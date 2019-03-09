@@ -65,6 +65,13 @@ colnames(y) <-  c2
 colnames(y)[colnames(y) == ''] <- "Region"
 gdp_data_by_country <- y %>% subset(Region %in% countries) %>% filter(Year == "2010" | Year == "2015") %>% select(Region, Year, Series, Value) %>% spread(Series, Value)
 
+
+gather_pop <- population_data_by_country %>% gather("trend" ,"value" , 
+                                                    `Infant mortality for both sexes (per 1,000 live births)`: `Total fertility rate (children per women)`) %>%
+  spread("Year" , "value") 
+  
+  colnames(gather_pop) <- c("region", "trend", "yr2010" , "yr2015")
+  gather_pop <- gather_pop %>% mutate(change = as.numeric(yr2015 , na.rm = T) - as.numeric(yr2010, na.rm = T))
 ## joins data tables by country.
 all_data <- full_join(population_data_by_country , gdp_data_by_country, by = NULL, type = "full" , match = "all")
 
