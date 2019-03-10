@@ -90,9 +90,6 @@ world_pop_map <- world_pop_map %>%
                                                                        paste(bin_values_rounded[5],"to",bin_values_rounded[6]))))
 
 
-ggplot(data = world_pop_map) +
-  geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = `Percentage change`)) +
-  scale_fill_brewer(palette = "RdYlGn") +
 
 
 
