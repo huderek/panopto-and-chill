@@ -20,7 +20,7 @@ my_ui <- fluidPage(
     # interaction panel
     sidebarPanel(
       ##select the features to display
-      radioButtons("type2", "Data Type",
+      radioButtons(inputId = "type2", "Data Type",
                    c("yr2010","yr2015", "change")
                    ),
       selectInput(inputId = "type1", label = "trend",
@@ -71,7 +71,6 @@ my_server <-  function(input, output){
     
   })
   
-}
 
 shinyApp(ui = my_ui , server = my_server)
 

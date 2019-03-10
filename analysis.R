@@ -8,7 +8,7 @@ library("knitr")
 
 #x <- read.csv("populationdata.csv" , stringsAsFactors = FALSE)
 y <- read.csv("gdpdata.csv" , stringsAsFactors = FALSE)
-
+options(scipen = 999)
 
 x <- read.csv("populationdata.csv.csv" , stringsAsFactors = FALSE)
 #y <- read.csv("gdpdata.csv" , stringsAsFactors = FALSE)
@@ -94,10 +94,10 @@ bin_values <- quantile(world_pop_map$change , probs = c(0, 0.2, 0.4, 0.6, 0.8, 1
 bin_values_rounded <-  round(bin_values)
 world_pop_map <- world_pop_map %>% 
   mutate(`Percentage change` = cut(change, breaks=bin_values, labels=c(paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
-                                                                       paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
                                                                        paste(bin_values_rounded[2],"to",bin_values_rounded[3]), 
                                                                        paste(bin_values_rounded[3],"to",bin_values_rounded[4]), 
-                                                                       paste(bin_values_rounded[4],"to",bin_values_rounded[5]))))
+                                                                       paste(bin_values_rounded[4],"to",bin_values_rounded[5]), 
+                                                                       paste(bin_values_rounded[5],"to",bin_values_rounded[6]))))
 
 
 ggplot(data = world_pop_map) +
@@ -107,3 +107,12 @@ ggplot(data = world_pop_map) +
   coord_quickmap() +
   theme(legend.position = "bottom")
 
+
+bin_values_color <- function(a){
+  if(){
+    bin_values <-  c(0, 995, 3900, 12055, Inf)
+  }
+  else{
+    bin_values <- 
+  }
+}
