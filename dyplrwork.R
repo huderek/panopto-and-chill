@@ -6,14 +6,41 @@ library("dplyr")
 library("markdown")
 library("knitr")
 
-#x <- read.csv("populationdata.csv" , stringsAsFactors = FALSE)
-y <- read.csv("gdpdata.csv" , stringsAsFactors = FALSE)
-options(scipen = 999)
-
 x <- read.csv("populationdata.csv.csv" , stringsAsFactors = FALSE)
-#y <- read.csv("gdpdata.csv" , stringsAsFactors = FALSE)
+y <- read.csv("gdpdata.csv" , stringsAsFactors = FALSE)
 
-#####################data cleaning#########################################
+
+#### dplyr work ###########
+
+#c <- unname(unlist(x[1,]))
+#colnames(x) <-  c
+#colnames(x)[colnames(x) == ''] <- "Region"
+#population_with_regions <- x %>% filter(Year == "2015" | Year == "2010")%>% select(Region, Year, Series, Value) %>% spread(Series, Value) 
+
+#c2 <- unname(unlist(y[1,]))
+#colnames(y) <-  c2
+#colnames(y)[colnames(y) == ''] <- "Region"
+#gdp_data_with_regions <- y %>%  filter(Year == "2010" | Year == "2015") %>% select(Region, Year, Series, Value) %>% spread(Series, Value) 
+
+
+#all_data_with_regions <- full_join(population_with_regions , gdp_data_with_regions, by = NULL, type = "full" , match = "all")
+
+#all_countries <- "Total, all countries or areas"
+
+#main_regions <- c( "Africa","Asia","Europe", "Latin America & the Caribbean","Northern America", "Oceania")
+
+#africa_subregions <- c("Northern Africa", "Sub-Saharan Africa", "Eastern Africa", "Middle Africa", "Southern Africa", "Western Africa")
+
+#latin america_and_the_caribbean_subregions <- c("Caribbean", "Central America", "South America")
+
+#asia_subregions <- c("Central Asia", "Eastern Asia", "South-central Asia", "South-eastern Asia", "Southern Asia", "Western Asia")
+
+#europe_subreagions <- c("Eastern Europe", "Northern Europe", "Southern Europe", "Western Europe")
+
+#oceania_subregions <- c("Australia and New Zealand", "Melanesia", "Micronesia", "Polynesia")
+
+
+####trying to ling region and subregion########
 
 countries <- c("United States", "Canada", "Afghanistan", "Albania", 
                "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla", 
@@ -56,51 +83,37 @@ countries <- c("United States", "Canada", "Afghanistan", "Albania",
 c <- unname(unlist(x[1,]))
 colnames(x) <-  c
 colnames(x)[colnames(x) == ''] <- "Region"
-population_data_by_country <- x %>% subset(Region %in% countries) %>% filter(Year == "2015" | Year == "2010")%>% select(Region, Year, Series, Value) %>% spread(Series, Value)
+population_data_by_country <- x %>% subset(Region %in% countries) %>% filter(Year == "2015" | Year == "2010")%>% select(Region,`Region/Country/Area`,Year, Series, Value) %>% spread(Series, Value)
 
 
 c2 <- unname(unlist(y[1,]))
 colnames(y) <-  c2
 colnames(y)[colnames(y) == ''] <- "Region"
-gdp_data_by_country <- y %>% subset(Region %in% countries) %>% filter(Year == "2010" | Year == "2015") %>% select(Region, Year, Series, Value) %>% spread(Series, Value)
+gdp_data_by_country <- y %>% subset(Region %in% countries) %>% filter(Year == "2010" | Year == "2015") %>% select(Region,`Region/Country/Area`,Year, Series, Value) %>% spread(Series, Value)
 
-
-gather_pop <- population_data_by_country %>% gather("trend" ,"value" , 
-                                                    `Infant mortality for both sexes (per 1,000 live births)`: `Total fertility rate (children per women)`) %>%
-  spread("Year" , "value") 
-
-colnames(gather_pop) <- c("region", "trend", "yr2010" , "yr2015")
-gather_pop <- gather_pop %>% mutate(change = as.numeric(yr2015 , na.rm = T) - as.numeric(yr2010, na.rm = T))
 ## joins data tables by country.
 all_data <- full_join(population_data_by_country , gdp_data_by_country, by = NULL, type = "full" , match = "all")
+#cleaner_all_data <- as.numeric(all_data$`Region/Country/Area`)
+all_data$`Region/Country/Area` <- as.numeric(all_data$`Region/Country/Area`)
 
-write.csv(gather_pop,"gather_pop.csv")
+all_data$`GDP in constant 2010 prices (millions of US dollars)` <- as.numeric(gsub(",","",all_data$`GDP in constant 2010 prices (millions of US dollars)`))
+all_data$`GDP in current prices (millions of US dollars)` <- as.numeric(gsub(",","",all_data$`GDP in current prices (millions of US dollars)`))
+all_data$`GDP per capita (US dollars)` <- as.numeric(gsub(",","",all_data$`GDP per capita (US dollars)`))
 
-#################################plotting####################################################
-
-
-
-bin_values <- quantile(world_pop_map$change , probs = c(0, 0.2, 0.4, 0.6, 0.8, 1) , na.rm = T)
-bin_values_rounded <-  round(bin_values)
-world_pop_map <- world_pop_map %>% 
-  mutate(`Percentage change` = cut(change, breaks=bin_values, labels=c(paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
-                                                                       paste(bin_values_rounded[2],"to",bin_values_rounded[3]), 
-                                                                       paste(bin_values_rounded[3],"to",bin_values_rounded[4]), 
-                                                                       paste(bin_values_rounded[4],"to",bin_values_rounded[5]), 
-                                                                       paste(bin_values_rounded[5],"to",bin_values_rounded[6]))))
-
-
-ggplot(data = world_pop_map) +
-  geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = `Percentage change`)) +
-  scale_fill_brewer(palette = "RdYlGn") +
+all_data$`Infant mortality for both sexes (per 1,000 live births)` <- as.numeric(all_data$`Infant mortality for both sexes (per 1,000 live births)`)
+all_data$`Life expectancy at birth for both sexes (years)` <- as.numeric(all_data$`Life expectancy at birth for both sexes (years)`)
+all_data$`Life expectancy at birth for females (years)` <- as.numeric(all_data$`Life expectancy at birth for females (years)`)
+all_data$`Life expectancy at birth for males (years)` <- as.numeric(all_data$`Life expectancy at birth for males (years)`)
+all_data$`Maternal mortality ratio (deaths per 100,000 population)` <- as.numeric(all_data$`Maternal mortality ratio (deaths per 100,000 population)`)
+all_data$`Population annual rate of increase (percent)` <- as.numeric(all_data$`Population annual rate of increase (percent)`)
+all_data$`Total fertility rate (children per women)` <- as.numeric(all_data$`Total fertility rate (children per women)`)
+all_data$`GDP real rates of growth (percent)` <- as.numeric(all_data$`GDP real rates of growth (percent)`)
 
 
+region_and_subregions <- read.csv("data/all.csv") %>% select(name, country.code, region, sub.region)
 
-bin_values_color <- function(a){
-  if(a == "GDP_millions_of_USD"){
-    bin_values <-  c(0, 995, 3900, 12055, Inf)
-  }
-  else{
-    bin_values <- c(0, 32, 5000, 40000, Inf )
-  }
-}
+all_data_with_regions <- left_join(all_data,region_and_subregions, by = c("Region/Country/Area" = "country.code"))
+
+print(all_data)
+
+write.csv(all_data_with_regions, "all_data_with_regions.csv")
