@@ -57,16 +57,23 @@ my_server <-  function(input, output){
   
   output$graph <- renderPlot({
     by_yr <- filter(selected_complete_data, Year == input$rb_yr)
+    if(input$type4 == "All"){
+      regioned <- by_yr
+    }else{
+      regioned <- filter(by_yr, region == input$type4)
+    }
    
     
-    thegraph <- ggplot(by_yr, na.rm = T) +
+    thegraph <- ggplot(regioned, na.rm = T) +
       geom_point(mapping = aes_string(y = input$radio_key , x = input$select_key2 ))
  
     
   thegraph
+  
     
     
   })
+
 }
 
 
@@ -91,6 +98,8 @@ page_one <- tabPanel( "First Page",
   
 
 
+
+
 page_two <-  tabPanel( "Second Page",
                        titlePanel("Vizualization"),
                        sidebarLayout(  # lay out the passed content into two columns
@@ -101,7 +110,9 @@ page_two <-  tabPanel( "Second Page",
                            radioButtons( inputId = "radio_key", label = "Choose an dependant variable (y-axis)",
                                          choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate", "GDP millions of USD" = "GDP_millions_of_USD", "GDP per capita USD"="GDP_per_capita_USD")),
                            selectInput( inputId = "type3", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
-                           selectInput( inputId = "type4", label = "Filter by region:", choices = c("Africa", "Americas","Asia", "Europe", "Oceania"))
+                           selectInput( inputId = "type4", label = "Filter by region:", choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
+                           #selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
+                           
                          ),
                          mainPanel(    # lay out the passed content inside the "main" column
                            textOutput(outputId = "messagetwo"),
@@ -111,8 +122,7 @@ page_two <-  tabPanel( "Second Page",
 )
 
 
-thegraph <- ggplot(selected_complete_data, na.rm = T) +
-  geom_point(mapping = aes(y = Life_expectancy, x = Fertility_rate )) 
+
 
 
 my_ui <- navbarPage("My application", page_one, page_two)
