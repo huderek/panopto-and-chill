@@ -34,9 +34,10 @@ my_server <-  function(input, output){
     
     world_pop_map <- left_join(world_map, data_new, by = "Country.Code") 
     ##finding the 5 bins based on quantiles 
-    temp <-  input$type2
+    #temp <- as.character(input$type2)
     bin_values <- quantile(world_pop_map$change , probs = c(0, 0.2, 0.4, 0.6, 0.8, 1) , na.rm = T)
     bin_values_rounded <-  round(bin_values)
+<<<<<<< HEAD
     world_pop_map2 <-  mutate(world_pop_map, difference = cut(change, breaks=bin_values, labels=c(paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
                                                                   paste(bin_values_rounded[2],"to",bin_values_rounded[3]), 
                                                                   paste(bin_values_rounded[3],"to",bin_values_rounded[4]), 
@@ -45,11 +46,23 @@ my_server <-  function(input, output){
     
     
     ggplot(data = world_pop_map2) +
+=======
+    world_pop_map <- world_pop_map %>% 
+      mutate(difference = cut(change, breaks=bin_values, labels=c(paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
+                                                                           paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
+                                                                           paste(bin_values_rounded[2],"to",bin_values_rounded[3]), 
+                                                                           paste(bin_values_rounded[3],"to",bin_values_rounded[4]), 
+                                                                           paste(bin_values_rounded[4],"to",bin_values_rounded[5]))))
+    
+    
+    ggplot(data = world_pop_map) +
+>>>>>>> 65298666ccee9202cc887b20b369f20c0d0f201e
       geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = difference)) +
       scale_fill_brewer(palette = "RdYlGn") +
       #labs(title = paste("Change in" , input$type , "between the years" ,input$Years[1] , "and" ,input$Years[2] ) , x = "", y = "" , fill = "change") +
       coord_quickmap() +
       theme(legend.position = "bottom")
+    
     
   })
   
