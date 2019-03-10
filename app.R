@@ -37,33 +37,28 @@ my_server <-  function(input, output){
     #temp <- as.character(input$type2)
     bin_values <- quantile(world_pop_map$change , probs = c(0, 0.2, 0.4, 0.6, 0.8, 1) , na.rm = T)
     bin_values_rounded <-  round(bin_values)
-<<<<<<< HEAD
-    world_pop_map2 <-  mutate(world_pop_map, difference = cut(change, breaks=bin_values, labels=c(paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
+
+    world_pop_map <-  mutate(world_pop_map, difference = cut(change, breaks=bin_values, labels=c(paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
                                                                   paste(bin_values_rounded[2],"to",bin_values_rounded[3]), 
                                                                   paste(bin_values_rounded[3],"to",bin_values_rounded[4]), 
                                                                   paste(bin_values_rounded[4],"to",bin_values_rounded[5]), 
                                                                   paste(bin_values_rounded[5],"to",bin_values_rounded[6]))))
     
     
-    ggplot(data = world_pop_map2) +
-=======
-    world_pop_map <- world_pop_map %>% 
-      mutate(difference = cut(change, breaks=bin_values, labels=c(paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
-                                                                           paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
-                                                                           paste(bin_values_rounded[2],"to",bin_values_rounded[3]), 
-                                                                           paste(bin_values_rounded[3],"to",bin_values_rounded[4]), 
-                                                                           paste(bin_values_rounded[4],"to",bin_values_rounded[5]))))
-    
-    
+
+
     ggplot(data = world_pop_map) +
->>>>>>> 65298666ccee9202cc887b20b369f20c0d0f201e
-      geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = difference)) +
+      geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = difference), color = "black", size = .1) +
+      
       scale_fill_brewer(palette = "RdYlGn") +
-      #labs(title = paste("Change in" , input$type , "between the years" ,input$Years[1] , "and" ,input$Years[2] ) , x = "", y = "" , fill = "change") +
       coord_quickmap() +
-      theme(legend.position = "bottom")
-    
-    
+      theme(legend.position = "bottom")+
+      
+      if(input$type2 == "change"){
+        labs(title = paste("Change in" , input$type1 , "from 2010 to 2015"))  
+      }else{
+        labs(title = paste(input$type1, "data from", gsub("yr","", input$type2)))
+      }
   })
   
   output$graph <- renderPlot({
@@ -96,14 +91,15 @@ page_one <- tabPanel( "First Page",
       )), 
     # display panel
     mainPanel(
-       textOutput("selected_var1") ,plotOutput("plot"))
+       #textOutput("selected_var1") 
+      plotOutput("plot"))
       )
     )
   
 
 
 page_two <-  tabPanel( "Second Page",
-                       titlePanel("Vizualization"),
+                       titlePanel("Visualization"),
                        sidebarLayout(  # lay out the passed content into two columns
                          sidebarPanel( # lay out the passed content inside the "sidebar" column
                            radioButtons(inputId = "rb_yr", label = "Pick a year", choices = c(2010,2015 )),
