@@ -1,6 +1,6 @@
-#install.packages("shiny")
-#install.packages("DT")
-#install.packages("rsconnect")
+# install.packages("shiny")
+# install.packages("DT")
+# install.packages("rsconnect")
 library("rsconnect")
 library("shiny")
 library("ggplot2")
@@ -8,21 +8,21 @@ library("dplyr")
 library("tidyr")
 library("DT")
 library("maps")
-rsconnect::setAccountInfo(name='soham-gh', token='43013155CD55E73DD4A85A0B78A28FDD',
-                          secret='J5Ldo7vylZ9eow6mA6rE4sSLjhG4/VOJSqwEZIHP')
+rsconnect::setAccountInfo(
+  name = "soham-gh", token = "43013155CD55E73DD4A85A0B78A28FDD",
+  secret = "J5Ldo7vylZ9eow6mA6rE4sSLjhG4/VOJSqwEZIHP"
+)
 options(scipen = 999)
+
 gather_pop <- read.csv("gather_pop.csv",stringsAsFactors = FALSE)
 
-complete_data <- read.csv("all_data_with_regions.csv",stringsAsFactors = FALSE)
-selected_complete_data <- select(complete_data, -X, -Life.expectancy.at.birth.for.females..years.,-Life.expectancy.at.birth.for.males..years.,
-                                 -GDP.real.rates.of.growth..percent., -GDP.in.constant.2010.prices..millions.of.US.dollars.,-name, -Region.Country.Area)
 
- 
+complete_data <- read.csv("all_data_with_regions.csv", stringsAsFactors = FALSE)
+selected_complete_data <- select(complete_data, -X, -Life.expectancy.at.birth.for.females..years., -Life.expectancy.at.birth.for.males..years.,
+  -GDP.real.rates.of.growth..percent., -GDP.in.constant.2010.prices..millions.of.US.dollars., -name, -Region.Country.Area
+)
 
-colnames(selected_complete_data) <- c("Region", "Year", "Infant_mortality", "Life_expectancy","Maternal_mortality_ratio", "Annual_population__rate_of_change", "Fertility_rate", "GDP_millions_of_USD", "GDP_per_capita_USD", "region","sub_region")
-
-
-
+colnames(selected_complete_data) <- c("Region", "Year", "Infant_mortality", "Life_expectancy", "Maternal_mortality_ratio", "Annual_population__rate_of_change", "Fertility_rate", "GDP_millions_of_USD", "GDP_per_capita_USD", "region", "sub_region")
 
 my_server <-  function(input, output){
   output$plot <- renderPlot({
@@ -34,7 +34,37 @@ my_server <-  function(input, output){
       filter(trend == input$type1)  
     
     world_pop_map <- left_join(world_map, data_new, by = "Country.Code") 
-    ##finding the 5 bins based on quantiles 
+    
+    
+    output$sentance <- renderText({
+      conversion_list <- list(
+        Infant_mortality = "Infant mortality",
+        Life_expectancy = "Life expectancy", 
+        Maternal_mortality_ratio = "Maternal mortality ratio", 
+        Annual_population__rate_of_change = "Annual population rate of change", 
+        Fertility_rate = "Fertility rate",
+        GDP_millions_of_USD = "GDP millions of USD", 
+        GDP_per_capita_USD = "GDP per capita USD"
+      )
+      paste("You are now viewing", conversion_list[input$select_key2], "VS.", conversion_list[input$radio_key], "for year", input$rb_yr, 
+            "which is colored by", conversion_list[input$type3], "and also filtered by the region of", input$type4, ".")
+    })
+    
+    output$header <- renderText({
+      conversion_list <- list(
+        Infant_mortality = "Infant mortality",
+        Life_expectancy = "Life expectancy", 
+        Maternal_mortality_ratio = "Maternal mortality ratio", 
+        Annual_population__rate_of_change = "Annual population rate of change", 
+        Fertility_rate = "Fertility rate",
+        GDP_millions_of_USD = "GDP millions of USD", 
+        GDP_per_capita_USD = "GDP per capita USD"
+      )
+      
+      paste(conversion_list[input$select_key2], "VS.", conversion_list[input$radio_key], "for year", input$rb_yr, ".")
+      
+    })
+ 
     if(input$type2 == "yr2010"){
       column <- as.numeric(world_pop_map$yr2010)
       rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
@@ -57,44 +87,36 @@ my_server <-  function(input, output){
     }
     else{
       column <- as.numeric(world_pop_map$change)
-      rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
+      rakes <- round(quantile(column , prob = c(0, 0.3, 0.6, 0.9, 1), na.rm = T), 4)
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
                                                  paste(rakes[3],"to",rakes[4]), 
-                                                 paste(rakes[4],"to",rakes[5]),
-                                                 paste(rakes[5],"to",rakes[6])))
+                                                 paste(rakes[4],"to",rakes[5])))
       world_pop_map <- mutate(world_pop_map, bins) 
     }
-   
     ggplot(data = world_pop_map) +
-      geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = bins)) +
+      geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = bins), color = "black", size = .1)  +
       scale_fill_brewer(palette = "RdYlGn") +
-      #labs(title = paste("Change in" , input$type , "between the years" ,input$Years[1] , "and" ,input$Years[2] ) , x = "", y = "" , fill = "change") +
       coord_quickmap() +
-      theme(legend.position = "bottom")
-    
-    
+      theme(legend.position = "bottom")+
+      
+      if(input$type2 == "change"){
+        labs(title = paste("Change in" , input$type1 , "from 2010 to 2015"))  
+      }else{
+        labs(title = paste(input$type1, "data from", gsub("yr","", input$type2)))
+      }
   })
   
-
   output$graph <- renderPlot({
-    
+ 
+   by_yr <- filter(selected_complete_data, Year == input$rb_yr)
 
-    
-    by_yr <- filter(selected_complete_data, Year == input$rb_yr)
-    
-    
-    
-
-
-    
     if(input$type4 == "All"){
       regioned <- by_yr
     }else{
       regioned <- filter(by_yr, region == input$type4)
     }
    
-    
     if(input$type3 == "GDP_millions_of_USD"){
       column <- regioned$GDP_millions_of_USD
       rakes <- c(0,995,3900,12055, Inf)
@@ -112,48 +134,39 @@ my_server <-  function(input, output){
                                                   paste(rakes[3],"to",rakes[4]), 
                                                   paste(rakes[4],"to",rakes[5])))
       regioned <-  mutate(regioned, bins)
-      
     }
     
     thegraph <- ggplot(regioned, na.rm = T) +
       geom_point(mapping = aes_string(y = input$radio_key , x = input$select_key2, color = bins ))
-    
-    
   thegraph
-  
-    
-    
   })
-
 }
 
-
-
-
-
-page_one <- tabPanel( "First Page",
+#does the first page of the shiny
+page_one <- tabPanel( "World Map",
   sidebarLayout(
     # interaction panel
     sidebarPanel(
-      ##select the features to display
-      radioButtons(inputId = "type2", label = "Data Type",choices = 
-                   c("yr2010","yr2015", "change")
+      ## select the features to display
+      radioButtons(
+        inputId = "type2", label = "Data Type", choices =
+          c("yr2010", "yr2015", "change")
       ),
-      selectInput(inputId = "type1", label = "trend",
-                  unique(gather_pop$trend)
-      )), 
+      selectInput(
+        inputId = "type1", label = "trend",
+        unique(gather_pop$trend)
+      )
+    ),
     # display panel
     mainPanel(
-       textOutput("selected_var1") ,plotOutput("plot"))
-      )
+
+      textOutput("selected_var1"), plotOutput("plot")
     )
-  
-
-
-
-
-page_two <-  tabPanel( "Second Page",
-                       titlePanel("Vizualization"),
+  ) 
+)
+       #textOutput("selected_var1") 
+page_two <-  tabPanel( "Graphs",
+                       titlePanel("Visualization"),
                        sidebarLayout(  # lay out the passed content into two columns
                          sidebarPanel( # lay out the passed content inside the "sidebar" column
                            radioButtons(inputId = "rb_yr", label = "Pick a year", choices = c(2010,2015 )),
@@ -168,24 +181,17 @@ page_two <-  tabPanel( "Second Page",
                          ),
                          mainPanel(    # lay out the passed content inside the "main" column
                            textOutput(outputId = "messagetwo"),
-                           plotOutput(outputId = "graph")
+                           span(textOutput("header"),style="font-size:25px"),
+                           plotOutput(outputId = "graph"),
+                           textOutput("sentance")
                          )
                        )
 )
 
-
-
-
+#does the second page of the shiny.
+thegraph <- ggplot(selected_complete_data, na.rm = T) +
+  geom_point(mapping = aes(y = Life_expectancy, x = Fertility_rate))
 
 my_ui <- navbarPage("My application", page_one, page_two)
 
-
-
-
-shinyApp(ui = my_ui , server = my_server)
-
-
-
-
-
-
+shinyApp(ui = my_ui, server = my_server)
