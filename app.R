@@ -26,7 +26,6 @@ colnames(selected_complete_data) <- c("Region", "Year", "Infant_mortality", "Lif
 
 my_server <-  function(input, output){
   output$plot <- renderPlot({
-    
     world_map <- map_data("world") %>%
       mutate(Country.Code = iso.alpha(region , 3))
     ##filtering based on user input 
@@ -35,26 +34,9 @@ my_server <-  function(input, output){
       filter(trend == input$type1)  
     
     world_pop_map <- left_join(world_map, data_new, by = "Country.Code") 
-    ##finding the 5 bins based on quantiles 
-    #temp <- as.character(input$type2)
-
-    bin_values <- quantile(world_pop_map$change , probs = c(0, 0.2, 0.4, 0.6, 0.8, 1) , na.rm = T)
-    bin_values_rounded <-  round(bin_values)
-    
-    world_pop_map <-  mutate(world_pop_map, difference = cut(change, breaks=bin_values, labels=c(paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
-                                                                  paste(bin_values_rounded[2],"to",bin_values_rounded[3]), 
-                                                                  paste(bin_values_rounded[3],"to",bin_values_rounded[4]), 
-                                                                  paste(bin_values_rounded[4],"to",bin_values_rounded[5]), 
-                                                                  paste(bin_values_rounded[5],"to",bin_values_rounded[6]))))
-    
-    
-
-
-    ggplot(data = world_pop_map) +
-      geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = difference), color = "black", size = .1) +
-
+ 
     if(input$type2 == "yr2010"){
-      column <- world_pop_map$yr2010
+      column <- as.numeric(world_pop_map$yr2010)
       rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
@@ -64,7 +46,7 @@ my_server <-  function(input, output){
       world_pop_map <- mutate(world_pop_map, bins) 
     }
     else if(input$type2 == "yr2015"){
-      column <- world_pop_map$yr2015
+      column <- as.numeric(world_pop_map$yr2015)
       rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
@@ -74,7 +56,7 @@ my_server <-  function(input, output){
       world_pop_map <- mutate(world_pop_map, bins) 
     }
     else{
-      column <- world_pop_map$change
+      column <- as.numeric(world_pop_map$change)
       rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
@@ -85,7 +67,7 @@ my_server <-  function(input, output){
     }
    
     ggplot(data = world_pop_map) +
-      geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = bins)) +
+      geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = bins), color = "black", size = .1)  +
       scale_fill_brewer(palette = "RdYlGn") +
       coord_quickmap() +
       theme(legend.position = "bottom")+
@@ -99,19 +81,9 @@ my_server <-  function(input, output){
   
 
   output$graph <- renderPlot({
-    
-
-    
+ 
     by_yr <- filter(selected_complete_data, Year == input$rb_yr)
-    
-    
-    
 
- # new_by_yr <- mutate(by_yr, bins = cut(input$type3, breaks = bin_values, labels=c(paste(bin_values[1],"to",bin_values[2]), 
-    #                                                                          paste(bin_values[2],"to",bin_values[3]), 
-               #                                                              paste(bin_values[3],"to",bin_values[4]), 
-                   #                                                           paste(bin_values[4],"to",bin_values[5]))))
-                                                                               
     
     if(input$type4 == "All"){
       regioned <- by_yr
@@ -184,9 +156,9 @@ page_two <-  tabPanel( "Second Page",
                          sidebarPanel( # lay out the passed content inside the "sidebar" column
                            radioButtons(inputId = "rb_yr", label = "Pick a year", choices = c(2010,2015 )),
                            selectInput( inputId = "select_key2", label = "Choose the independant variable (x-axis)",
-                                        choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate", "GDP millions of USD" = "GDP_millions_of_USD", "GDP per capita USD"="GDP_per_capita_USD")),
+                                        choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate")),
                            radioButtons( inputId = "radio_key", label = "Choose an dependant variable (y-axis)",
-                                         choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate", "GDP millions of USD" = "GDP_millions_of_USD", "GDP per capita USD"="GDP_per_capita_USD")),
+                                         choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate")),
                            selectInput( inputId = "type3", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
                            selectInput( inputId = "type4", label = "Filter by region:", choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
                            #selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
