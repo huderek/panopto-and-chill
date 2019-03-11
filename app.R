@@ -26,7 +26,6 @@ colnames(selected_complete_data) <- c("Region", "Year", "Infant_mortality", "Lif
 
 my_server <-  function(input, output){
   output$plot <- renderPlot({
-    
     world_map <- map_data("world") %>%
       mutate(Country.Code = iso.alpha(region , 3))
     ##filtering based on user input 
