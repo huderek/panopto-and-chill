@@ -57,15 +57,13 @@ my_server <-  function(input, output){
     }
     else{
       column <- as.numeric(world_pop_map$change)
-      rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
+      rakes <- round(quantile(column , prob = c(0, 0.3, 0.6, 0.9, 1), na.rm = T), 4)
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
                                                  paste(rakes[3],"to",rakes[4]), 
-                                                 paste(rakes[4],"to",rakes[5]),
-                                                 paste(rakes[5],"to",rakes[6])))
+                                                 paste(rakes[4],"to",rakes[5])))
       world_pop_map <- mutate(world_pop_map, bins) 
     }
-   
     ggplot(data = world_pop_map) +
       geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = bins)) +
       scale_fill_brewer(palette = "RdYlGn") +
