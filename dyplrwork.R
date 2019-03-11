@@ -83,13 +83,21 @@ countries <- c("United States", "Canada", "Afghanistan", "Albania",
 c <- unname(unlist(x[1,]))
 colnames(x) <-  c
 colnames(x)[colnames(x) == ''] <- "Region"
-population_data_by_country <- x %>% subset(Region %in% countries) %>% filter(Year == "2015" | Year == "2010")%>% select(Region,`Region/Country/Area`,Year, Series, Value) %>% spread(Series, Value)
+population_data_by_country <- x %>% subset(Region %in% countries) %>% filter(Year == "2015" | Year == "2010")%>% select(Region,Region/Country/Area,Year, Series, Value) %>% spread(Series, Value)
 
 
 c2 <- unname(unlist(y[1,]))
 colnames(y) <-  c2
 colnames(y)[colnames(y) == ''] <- "Region"
-gdp_data_by_country <- y %>% subset(Region %in% countries) %>% filter(Year == "2010" | Year == "2015") %>% select(Region,`Region/Country/Area`,Year, Series, Value) %>% spread(Series, Value)
+gdp_data_by_country <- y %>% subset(Region %in% countries) %>% filter(Year == "2010" | Year == "2015") %>% select(Region,Region/Country/Area,Year, Series, Value) %>% spread(Series, Value)
+
+
+
+
+
+
+
+
 
 ## joins data tables by country.
 all_data <- full_join(population_data_by_country , gdp_data_by_country, by = NULL, type = "full" , match = "all")
@@ -114,6 +122,6 @@ region_and_subregions <- read.csv("data/all.csv") %>% select(name, country.code,
 
 all_data_with_regions <- left_join(all_data,region_and_subregions, by = c("Region/Country/Area" = "country.code"))
 
-print(all_data)
+
 
 write.csv(all_data_with_regions, "all_data_with_regions.csv")
