@@ -86,7 +86,7 @@ my_server <-  function(input, output){
     
     
 
- 
+
     
     if(input$type4 == "All"){
       regioned <- by_yr
@@ -158,9 +158,9 @@ page_two <-  tabPanel( "Second Page",
                          sidebarPanel( # lay out the passed content inside the "sidebar" column
                            radioButtons(inputId = "rb_yr", label = "Pick a year", choices = c(2010,2015 )),
                            selectInput( inputId = "select_key2", label = "Choose the independant variable (x-axis)",
-                                        choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate", "GDP millions of USD" = "GDP_millions_of_USD", "GDP per capita USD"="GDP_per_capita_USD")),
+                                        choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate")),
                            radioButtons( inputId = "radio_key", label = "Choose an dependant variable (y-axis)",
-                                         choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate", "GDP millions of USD" = "GDP_millions_of_USD", "GDP per capita USD"="GDP_per_capita_USD")),
+                                         choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate")),
                            selectInput( inputId = "type3", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
                            selectInput( inputId = "type4", label = "Filter by region:", choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
                            #selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
