@@ -15,7 +15,7 @@ x <- read.csv("populationdata.csv.csv" , stringsAsFactors = FALSE)
 
 #####################data cleaning#########################################
 
-countries <- c("United States", "Canada", "Afghanistan", "Albania", 
+countries <- c("USA", "Canada", "Afghanistan", "Albania", 
                "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla", 
                "Antarctica", "Antigua and/or Barbuda", "Argentina", "Armenia", "Aruba", 
                "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", 
@@ -53,16 +53,25 @@ countries <- c("United States", "Canada", "Afghanistan", "Albania",
                "United States minor outlying islands", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City State",
                "Venezuela", "Vietnam", "Virigan Islands (British)", "Virgin Islands (U.S.)", "Wallis and Futuna Islands", 
                "Western Sahara", "Yemen", "Yugoslavia", "Zaire", "Zambia", "Zimbabwe") ;
+
+countries_isod <- iso.alpha(countries, 3)
+countries_isod
 c <- unname(unlist(x[1,]))
 colnames(x) <-  c
 colnames(x)[colnames(x) == ''] <- "Region"
-population_data_by_country <- x %>% subset(Region %in% countries) %>% filter(Year == "2015" | Year == "2010")%>% select(Region, Year, Series, Value) %>% spread(Series, Value)
+population_data_by_country <- x %>% 
+  subset(Region %in% countries) %>% 
+  filter(Year == "2015" | Year == "2010")%>% 
+  select(Region, Year, Series, Value) %>% 
+  spread(Series, Value)
 
 
 c2 <- unname(unlist(y[1,]))
 colnames(y) <-  c2
 colnames(y)[colnames(y) == ''] <- "Region"
-gdp_data_by_country <- y %>% subset(Region %in% countries) %>% filter(Year == "2010" | Year == "2015") %>% select(Region, Year, Series, Value) %>% spread(Series, Value)
+gdp_data_by_country <- y %>% subset(Region %in% countries) %>% 
+  filter(Year == "2010" | Year == "2015") %>% 
+  select(Region, Year, Series, Value) %>% spread(Series, Value)
 
 
 gather_pop <- population_data_by_country %>% gather("trend" ,"value" , 
