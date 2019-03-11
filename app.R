@@ -87,15 +87,13 @@ my_server <-  function(input, output){
     }
     else{
       column <- as.numeric(world_pop_map$change)
-      rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
+      rakes <- round(quantile(column , prob = c(0, 0.3, 0.6, 0.9, 1), na.rm = T), 4)
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
                                                  paste(rakes[3],"to",rakes[4]), 
-                                                 paste(rakes[4],"to",rakes[5]),
-                                                 paste(rakes[5],"to",rakes[6])))
+                                                 paste(rakes[4],"to",rakes[5])))
       world_pop_map <- mutate(world_pop_map, bins) 
     }
-   
     ggplot(data = world_pop_map) +
       geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = bins), color = "black", size = .1)  +
       scale_fill_brewer(palette = "RdYlGn") +
@@ -109,19 +107,16 @@ my_server <-  function(input, output){
       }
   })
   
-
   output$graph <- renderPlot({
  
    by_yr <- filter(selected_complete_data, Year == input$rb_yr)
 
-    
     if(input$type4 == "All"){
       regioned <- by_yr
     }else{
       regioned <- filter(by_yr, region == input$type4)
     }
    
-    
     if(input$type3 == "GDP_millions_of_USD"){
       column <- regioned$GDP_millions_of_USD
       rakes <- c(0,995,3900,12055, Inf)
@@ -148,9 +143,7 @@ my_server <-  function(input, output){
 }
 
 #does the first page of the shiny
-
-
-page_one <- tabPanel( "First Page",
+page_one <- tabPanel( "World Map",
   sidebarLayout(
     # interaction panel
     sidebarPanel(
@@ -172,9 +165,7 @@ page_one <- tabPanel( "First Page",
   ) 
 )
        #textOutput("selected_var1") 
-     
-
-page_two <-  tabPanel( "Second Page",
+page_two <-  tabPanel( "Graphs",
                        titlePanel("Visualization"),
                        sidebarLayout(  # lay out the passed content into two columns
                          sidebarPanel( # lay out the passed content inside the "sidebar" column
@@ -198,11 +189,8 @@ page_two <-  tabPanel( "Second Page",
 )
 
 #does the second page of the shiny.
-
-
 thegraph <- ggplot(selected_complete_data, na.rm = T) +
   geom_point(mapping = aes(y = Life_expectancy, x = Fertility_rate))
-
 
 my_ui <- navbarPage("My application", page_one, page_two)
 
