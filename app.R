@@ -36,9 +36,8 @@ my_server <-  function(input, output){
     
     world_pop_map <- left_join(world_map, data_new, by = "Country.Code") 
     ##finding the 5 bins based on quantiles 
-    #temp <- as.character(input$type2)
     if(input$type2 == "yr2010"){
-      column <- world_pop_map$yr2010
+      column <- as.numeric(world_pop_map$yr2010)
       rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
@@ -48,7 +47,7 @@ my_server <-  function(input, output){
       world_pop_map <- mutate(world_pop_map, bins) 
     }
     else if(input$type2 == "yr2015"){
-      column <- world_pop_map$yr2015
+      column <- as.numeric(world_pop_map$yr2015)
       rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
@@ -58,7 +57,7 @@ my_server <-  function(input, output){
       world_pop_map <- mutate(world_pop_map, bins) 
     }
     else{
-      column <- world_pop_map$change
+      column <- as.numeric(world_pop_map$change)
       rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
@@ -88,11 +87,7 @@ my_server <-  function(input, output){
     
     
 
- # new_by_yr <- mutate(by_yr, bins = cut(input$type3, breaks = bin_values, labels=c(paste(bin_values[1],"to",bin_values[2]), 
-    #                                                                          paste(bin_values[2],"to",bin_values[3]), 
-               #                                                              paste(bin_values[3],"to",bin_values[4]), 
-                   #                                                           paste(bin_values[4],"to",bin_values[5]))))
-                                                                               
+ 
     
     if(input$type4 == "All"){
       regioned <- by_yr
