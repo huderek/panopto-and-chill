@@ -8,7 +8,7 @@ library("knitr")
 
 #x <- read.csv("populationdata.csv" , stringsAsFactors = FALSE)
 y <- read.csv("gdpdata.csv" , stringsAsFactors = FALSE)
-
+options(scipen = 999)
 
 x <- read.csv("populationdata.csv.csv" , stringsAsFactors = FALSE)
 #y <- read.csv("gdpdata.csv" , stringsAsFactors = FALSE)
@@ -78,35 +78,16 @@ write.csv(gather_pop,"gather_pop.csv")
 
 #################################plotting####################################################
 
-#world_map <- map_data("world") %>%
-  #mutate(Country.Code = iso.alpha(region , 3))
-##filtering based on user input 
-#data_new <-  gather_pop %>% 
- # mutate(Country.Code = iso.alpha(region , 3)) %>%
- # filter(trend == "Infant mortality for both sexes (per 1,000 live births)") #%>% 
-  #filter(Series.Name == input$type) %>%
-  #spread(year, value)
-#adding change column
-#forest_data_new <-  forest_data_new %>%
-  #mutate(change = forest_data_new[, 5] - forest_data_new[, 4])
-
-#world_pop_map <- left_join(world_map, data_new, by = "Country.Code") 
-##finding the 5 bins based on quantiles 
-#bin_values <- quantile(world_pop_map$change , probs = c(0, 0.2, 0.4, 0.6, 0.8, 1) , na.rm = T)
-#bin_values_rounded <-  round(bin_values)
-#world_pop_map <- world_pop_map %>% 
-  #mutate(`Percentage change` = cut(change, breaks=bin_values, labels=c(paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
-    #                                                                   paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
-   #                                                                    paste(bin_values_rounded[2],"to",bin_values_rounded[3]), 
-   #                                                                    paste(bin_values_rounded[3],"to",bin_values_rounded[4]), 
-    #                                                                   paste(bin_values_rounded[4],"to",bin_values_rounded[5]))))
 
 
-#ggplot(data = world_pop_map) +
-  #geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = `Percentage change`)) +
- # scale_fill_brewer(palette = "RdYlGn") +
-  #labs(title = paste("Change in" , input$type , "between the years" ,input$Years[1] , "and" ,input$Years[2] ) , x = "", y = "" , fill = "change") +
-  
-#coord_quickmap() +
- # theme(legend.position = "bottom")
 
+
+
+bin_values_color <- function(a){
+  if(a == "GDP_millions_of_USD"){
+    bin_values <-  c(0, 995, 3900, 12055, Inf)
+  }
+  else{
+    bin_values <- c(0, 32, 5000, 40000, Inf )
+  }
+}

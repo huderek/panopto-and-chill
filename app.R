@@ -12,13 +12,15 @@ rsconnect::setAccountInfo(name='soham-gh', token='43013155CD55E73DD4A85A0B78A28F
                           secret='J5Ldo7vylZ9eow6mA6rE4sSLjhG4/VOJSqwEZIHP')
 options(scipen = 999)
 gather_pop <- read.csv("gather_pop.csv",stringsAsFactors = FALSE)
-
+source("analysis.R")
 complete_data <- read.csv("all_data_with_regions.csv",stringsAsFactors = FALSE)
 selected_complete_data <- select(complete_data, -X, -Life.expectancy.at.birth.for.females..years.,-Life.expectancy.at.birth.for.males..years.,
                                  -GDP.real.rates.of.growth..percent., -GDP.in.constant.2010.prices..millions.of.US.dollars.,-name, -Region.Country.Area)
 
+ 
 
 colnames(selected_complete_data) <- c("Region", "Year", "Infant_mortality", "Life_expectancy","Maternal_mortality_ratio", "Annual_population__rate_of_change", "Fertility_rate", "GDP_millions_of_USD", "GDP_per_capita_USD", "region","sub_region")
+
 
 
 
@@ -37,7 +39,7 @@ my_server <-  function(input, output){
     #temp <- as.character(input$type2)
     bin_values <- quantile(world_pop_map$change , probs = c(0, 0.2, 0.4, 0.6, 0.8, 1) , na.rm = T)
     bin_values_rounded <-  round(bin_values)
-
+    
     world_pop_map <-  mutate(world_pop_map, difference = cut(change, breaks=bin_values, labels=c(paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
                                                                   paste(bin_values_rounded[2],"to",bin_values_rounded[3]), 
                                                                   paste(bin_values_rounded[3],"to",bin_values_rounded[4]), 
@@ -49,7 +51,6 @@ my_server <-  function(input, output){
 
     ggplot(data = world_pop_map) +
       geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = difference), color = "black", size = .1) +
-      
       scale_fill_brewer(palette = "RdYlGn") +
       coord_quickmap() +
       theme(legend.position = "bottom")+
@@ -61,19 +62,37 @@ my_server <-  function(input, output){
       }
   })
   
+
   output$graph <- renderPlot({
     by_yr <- filter(selected_complete_data, Year == input$rb_yr)
+    bin_values <- bin_values_color(selected_complete_data$GDP_millions_of_USD)
+    new_by_yr <- mutate(selected_complete_data, bins = cut(GDP_milions_of_USD, breaks = bin_values, labels=c(paste(bin_values[1],"to",bin_values[2]), 
+                                                                               paste(bin_values[2],"to",bin_values[3]), 
+                                                                               paste(bin_values[3],"to",bin_values[4]), 
+                                                                               paste(bin_values[4],"to",bin_values[5]))))
+                                                                               
+    
+    
+    
+    if(input$type4 == "All"){
+      regioned <- by_yr
+    }else{
+      regioned <- filter(by_yr, region == input$type4)
+    }
    
     
-    thegraph <- ggplot(by_yr, na.rm = T) +
-      geom_point(mapping = aes_string(y = input$radio_key , x = input$select_key2 ))
- 
+    thegraph <- ggplot(new_by_yr, na.rm = T) +
+      geom_point(mapping = aes_string(y = input$radio_key , x = input$select_key2, color = bins ))
+    
     
   thegraph
+  
     
     
   })
+
 }
+
 
 
 
@@ -98,6 +117,8 @@ page_one <- tabPanel( "First Page",
   
 
 
+
+
 page_two <-  tabPanel( "Second Page",
                        titlePanel("Visualization"),
                        sidebarLayout(  # lay out the passed content into two columns
@@ -106,7 +127,10 @@ page_two <-  tabPanel( "Second Page",
                            selectInput( inputId = "select_key2", label = "Choose the independant variable (x-axis)",
                                         choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate", "GDP millions of USD" = "GDP_millions_of_USD", "GDP per capita USD"="GDP_per_capita_USD")),
                            radioButtons( inputId = "radio_key", label = "Choose an dependant variable (y-axis)",
-                                         choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate", "GDP millions of USD" = "GDP_millions_of_USD", "GDP per capita USD"="GDP_per_capita_USD"))
+                                         choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate", "GDP millions of USD" = "GDP_millions_of_USD", "GDP per capita USD"="GDP_per_capita_USD")),
+                           selectInput( inputId = "type3", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
+                           selectInput( inputId = "type4", label = "Filter by region:", choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
+                           #selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
                            
                          ),
                          mainPanel(    # lay out the passed content inside the "main" column
@@ -117,8 +141,7 @@ page_two <-  tabPanel( "Second Page",
 )
 
 
-thegraph <- ggplot(selected_complete_data, na.rm = T) +
-  geom_point(mapping = aes(y = Life_expectancy, x = Fertility_rate )) 
+
 
 
 my_ui <- navbarPage("My application", page_one, page_two)
