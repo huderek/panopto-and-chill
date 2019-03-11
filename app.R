@@ -12,7 +12,7 @@ rsconnect::setAccountInfo(name='soham-gh', token='43013155CD55E73DD4A85A0B78A28F
                           secret='J5Ldo7vylZ9eow6mA6rE4sSLjhG4/VOJSqwEZIHP')
 options(scipen = 999)
 gather_pop <- read.csv("gather_pop.csv",stringsAsFactors = FALSE)
-source("analysis.R")
+
 complete_data <- read.csv("all_data_with_regions.csv",stringsAsFactors = FALSE)
 selected_complete_data <- select(complete_data, -X, -Life.expectancy.at.birth.for.females..years.,-Life.expectancy.at.birth.for.males..years.,
                                  -GDP.real.rates.of.growth..percent., -GDP.in.constant.2010.prices..millions.of.US.dollars.,-name, -Region.Country.Area)
@@ -37,26 +37,39 @@ my_server <-  function(input, output){
     world_pop_map <- left_join(world_map, data_new, by = "Country.Code") 
     ##finding the 5 bins based on quantiles 
     #temp <- as.character(input$type2)
-    bin_values <- quantile(world_pop_map$change , probs = c(0, 0.2, 0.4, 0.6, 0.8, 1) , na.rm = T)
-    bin_values_rounded <-  round(bin_values)
-
-
+    if(input$type2 == "yr2010"){
+      column <- world_pop_map$yr2010
+      rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
+      bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
+                                                 paste(rakes[2],"to",rakes[3]), 
+                                                 paste(rakes[3],"to",rakes[4]), 
+                                                 paste(rakes[4],"to",rakes[5]),
+                                                 paste(rakes[5],"to",rakes[6])))
+      world_pop_map <- mutate(world_pop_map, bins) 
+    }
+    else if(input$type2 == "yr2015"){
+      column <- world_pop_map$yr2015
+      rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
+      bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
+                                                 paste(rakes[2],"to",rakes[3]), 
+                                                 paste(rakes[3],"to",rakes[4]), 
+                                                 paste(rakes[4],"to",rakes[5]),
+                                                 paste(rakes[5],"to",rakes[6])))
+      world_pop_map <- mutate(world_pop_map, bins) 
+    }
+    else{
+      column <- world_pop_map$change
+      rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
+      bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
+                                                 paste(rakes[2],"to",rakes[3]), 
+                                                 paste(rakes[3],"to",rakes[4]), 
+                                                 paste(rakes[4],"to",rakes[5]),
+                                                 paste(rakes[5],"to",rakes[6])))
+      world_pop_map <- mutate(world_pop_map, bins) 
+    }
    
-
-    world_pop_map <-  mutate(world_pop_map, difference = cut(change, breaks=bin_values, labels=c(paste(bin_values_rounded[1],"to",bin_values_rounded[2]), 
-                                                                  paste(bin_values_rounded[2],"to",bin_values_rounded[3]), 
-                                                                  paste(bin_values_rounded[3],"to",bin_values_rounded[4]), 
-                                                                  paste(bin_values_rounded[4],"to",bin_values_rounded[5]), 
-                                                                  paste(bin_values_rounded[5],"to",bin_values_rounded[6]))))
-    
-    
-
-
-
-
-
     ggplot(data = world_pop_map) +
-      geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = difference)) +
+      geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = bins)) +
       scale_fill_brewer(palette = "RdYlGn") +
       #labs(title = paste("Change in" , input$type , "between the years" ,input$Years[1] , "and" ,input$Years[2] ) , x = "", y = "" , fill = "change") +
       coord_quickmap() +
@@ -67,15 +80,19 @@ my_server <-  function(input, output){
   
 
   output$graph <- renderPlot({
+    
+
+    
     by_yr <- filter(selected_complete_data, Year == input$rb_yr)
-    bin_values <- bin_values_color(selected_complete_data$GDP_millions_of_USD)
-    new_by_yr <- mutate(selected_complete_data, bins = cut(GDP_milions_of_USD, breaks = bin_values, labels=c(paste(bin_values[1],"to",bin_values[2]), 
-                                                                               paste(bin_values[2],"to",bin_values[3]), 
-                                                                               paste(bin_values[3],"to",bin_values[4]), 
-                                                                               paste(bin_values[4],"to",bin_values[5]))))
+    
+    
+    
+
+ # new_by_yr <- mutate(by_yr, bins = cut(input$type3, breaks = bin_values, labels=c(paste(bin_values[1],"to",bin_values[2]), 
+    #                                                                          paste(bin_values[2],"to",bin_values[3]), 
+               #                                                              paste(bin_values[3],"to",bin_values[4]), 
+                   #                                                           paste(bin_values[4],"to",bin_values[5]))))
                                                                                
-    
-    
     
     if(input$type4 == "All"){
       regioned <- by_yr
@@ -84,7 +101,27 @@ my_server <-  function(input, output){
     }
    
     
-    thegraph <- ggplot(new_by_yr, na.rm = T) +
+    if(input$type3 == "GDP_millions_of_USD"){
+      column <- regioned$GDP_millions_of_USD
+      rakes <- c(0,995,3900,12055, Inf)
+      bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
+                                                                    paste(rakes[2],"to",rakes[3]), 
+                                                                    paste(rakes[3],"to",rakes[4]), 
+                                                                    paste(rakes[4],"to",rakes[5])))
+      regioned <- mutate(regioned, bins) 
+    }
+    else{
+      column <- regioned$GDP_per_capita_USD
+      rakes <- c(0,32,5000,40000, Inf)
+      bins = cut(column, breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
+                                                  paste(rakes[2],"to",rakes[3]), 
+                                                  paste(rakes[3],"to",rakes[4]), 
+                                                  paste(rakes[4],"to",rakes[5])))
+      regioned <-  mutate(regioned, bins)
+      
+    }
+    
+    thegraph <- ggplot(regioned, na.rm = T) +
       geom_point(mapping = aes_string(y = input$radio_key , x = input$select_key2, color = bins ))
     
     
