@@ -34,7 +34,7 @@ my_server <-  function(input, output){
       filter(trend == input$type1)  
     
     world_pop_map <- left_join(world_map, data_new, by = "Country.Code") 
-    ##finding the 5 bins based on quantiles 
+ 
     if(input$type2 == "yr2010"){
       column <- as.numeric(world_pop_map$yr2010)
       rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
@@ -65,25 +65,22 @@ my_server <-  function(input, output){
       world_pop_map <- mutate(world_pop_map, bins) 
     }
     ggplot(data = world_pop_map) +
-      geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = bins)) +
+      geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = bins), color = "black", size = .1)  +
       scale_fill_brewer(palette = "RdYlGn") +
-      #labs(title = paste("Change in" , input$type , "between the years" ,input$Years[1] , "and" ,input$Years[2] ) , x = "", y = "" , fill = "change") +
       coord_quickmap() +
-      theme(legend.position = "bottom")
-    
-    
+      theme(legend.position = "bottom")+
+      
+      if(input$type2 == "change"){
+        labs(title = paste("Change in" , input$type1 , "from 2010 to 2015"))  
+      }else{
+        labs(title = paste(input$type1, "data from", gsub("yr","", input$type2)))
+      }
   })
   
 
   output$graph <- renderPlot({
-    
-
-    
+ 
     by_yr <- filter(selected_complete_data, Year == input$rb_yr)
-    
-    
-    
-
 
     
     if(input$type4 == "All"){
@@ -142,7 +139,8 @@ page_one <- tabPanel( "First Page",
       )), 
     # display panel
     mainPanel(
-       textOutput("selected_var1") ,plotOutput("plot"))
+       #textOutput("selected_var1") 
+      plotOutput("plot"))
       )
     )
   
@@ -151,7 +149,7 @@ page_one <- tabPanel( "First Page",
 
 
 page_two <-  tabPanel( "Second Page",
-                       titlePanel("Vizualization"),
+                       titlePanel("Visualization"),
                        sidebarLayout(  # lay out the passed content into two columns
                          sidebarPanel( # lay out the passed content inside the "sidebar" column
                            radioButtons(inputId = "rb_yr", label = "Pick a year", choices = c(2010,2015 )),
