@@ -195,7 +195,7 @@ page_two <-  tabPanel( "Graphs",
                        )
 )
 page_three <-  tabPanel( "Summary", titlePanel(""), h1(""))
-
+  
 page_four <-  tabPanel( "Source", titlePanel("Works Cited"), 
 gdp_data <- a("GDP Data Source", href ="http://data.un.org/_Docs/SYB/PDFs/SYB60_T03_Population%20Growth,%20Fertility%20and%20Mortality%20Indicators.pdf"),
 p(life_exp_url <- a("Population Data Source", href= "http://data.un.org/_Docs/SYB/PDFs/SYB61_T13_GDP%20and%20GDP%20Per%20Capita.pdf")))
@@ -206,6 +206,6 @@ p(life_exp_url <- a("Population Data Source", href= "http://data.un.org/_Docs/SY
 page_zero <-  tabPanel( "Introduction", titlePanel(""), h1(""))
 
 
-my_ui <- navbarPage("My application", page_zero ,page_one, page_two, page_three, page_four)
+my_ui <- navbarPage("Life Expectancy Analysis", page_zero ,page_one, page_two, page_three, page_four)
 
 shinyApp(ui = my_ui, server = my_server)
