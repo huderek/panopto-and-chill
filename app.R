@@ -67,7 +67,7 @@ my_server <-  function(input, output){
  
     if(input$type2 == "yr2010"){
       column <- as.numeric(world_pop_map$yr2010)
-      rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
+      rakes <- quantile(column , prob = c(0, 0.1, 0.4, 0.6, 0.9, 1), na.rm = T)
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
                                                  paste(rakes[3],"to",rakes[4]), 
@@ -77,7 +77,7 @@ my_server <-  function(input, output){
     }
     else if(input$type2 == "yr2015"){
       column <- as.numeric(world_pop_map$yr2015)
-      rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
+      rakes <- quantile(column , prob = c(0, 0.1, 0.4, 0.6, 0.9, 1), na.rm = T)
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
                                                  paste(rakes[3],"to",rakes[4]), 
@@ -87,7 +87,7 @@ my_server <-  function(input, output){
     }
     else{
       column <- as.numeric(world_pop_map$change)
-      rakes <- round(quantile(column , prob = c(0, 0.3, 0.6, 0.9, 1), na.rm = T), 4)
+      rakes <- round(quantile(column , prob = c(0, 0.1, 0.5, 0.9, 1), na.rm = T), 4)
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
                                                  paste(rakes[3],"to",rakes[4]), 
@@ -142,6 +142,8 @@ my_server <-  function(input, output){
   })
 }
 
+
+
 #does the first page of the shiny
 page_one <- tabPanel( "World Map",
   sidebarLayout(
@@ -177,7 +179,6 @@ page_two <-  tabPanel( "Graphs",
                            selectInput( inputId = "type3", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
                            selectInput( inputId = "type4", label = "Filter by region:", choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
                            #selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
-                           
                          ),
                          mainPanel(    # lay out the passed content inside the "main" column
                            textOutput(outputId = "messagetwo"),
@@ -187,9 +188,13 @@ page_two <-  tabPanel( "Graphs",
                          )
                        )
 )
+page_three <-  tabPanel( "Summary", titlePanel(""), p(""))
+
+page_four <-  tabPanel( "Source", titlePanel(""), h1(""))
+
+page_zero <-  tabPanel( "Introduction", titlePanel(""), p(""))
 
 
-
-my_ui <- navbarPage("My application", page_one, page_two)
+my_ui <- navbarPage("My application", page_zero ,page_one, page_two, page_three, page_four)
 
 shinyApp(ui = my_ui, server = my_server)
