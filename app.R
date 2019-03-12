@@ -107,7 +107,7 @@ my_server <-  function(input, output){
       scale_fill_brewer(palette = "RdYlGn") +
       coord_quickmap() +
       theme(legend.position = "bottom")+
-      labs(fill = conversion_list2[input$type1])+
+      labs(fill = conversion_list2[input$type1])
       
       if(input$type2 == "change"){
         labs(title = paste("Change in" , input$type1 , "from 2010 to 2015"))  
@@ -205,9 +205,12 @@ page_two <-  tabPanel( "Graphs",
 )
 page_three <-  tabPanel( "Summary", titlePanel(""), h1(""))
 
-page_four <-  tabPanel( "Source", titlePanel("Works Cited"), 
-gdp_data <- a("GDP Data Source", href ="http://data.un.org/_Docs/SYB/PDFs/SYB60_T03_Population%20Growth,%20Fertility%20and%20Mortality%20Indicators.pdf"),
-p(life_exp_url <- a("Population Data Source", href= "http://data.un.org/_Docs/SYB/PDFs/SYB61_T13_GDP%20and%20GDP%20Per%20Capita.pdf")))
+page_four <-  tabPanel( "Source", 
+                        titlePanel("Works Cited"), 
+gdp_data <- a("GDP Data Source", 
+              href ="http://data.un.org/_Docs/SYB/PDFs/SYB60_T03_Population%20Growth,%20Fertility%20and%20Mortality%20Indicators.pdf"),
+p(life_exp_url <- a("Population Data Source", 
+                    href= "http://data.un.org/_Docs/SYB/PDFs/SYB61_T13_GDP%20and%20GDP%20Per%20Capita.pdf")))
 
 
 
