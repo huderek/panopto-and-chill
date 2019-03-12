@@ -94,11 +94,20 @@ my_server <-  function(input, output){
                                                  paste(rakes[4],"to",rakes[5])))
       world_pop_map <- mutate(world_pop_map, bins) 
     }
+    conversion_list2 <- list("Infant mortality for both sexes (per 1,000 live births)"  = "Infant mortality per 1,000 live births" ,
+                            "Life expectancy at birth for both sexes (years)"   = "Life expectancy in years",
+                            "Life expectancy at birth for females (years)"  = "Life expectancy in years",
+                            "Life expectancy at birth for males (years)" = "Life expectancy in years",
+                            "Maternal mortality ratio (deaths per 100,000 population)" = "Maternal mortality ratio",
+                            "Population annual rate of increase (percent)"  = "Rate of annual population percent change",
+                            "Total fertility rate (children per women)"  = "Total fertility rate")
+    
     ggplot(data = world_pop_map) +
       geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = bins), color = "black", size = .1)  +
       scale_fill_brewer(palette = "RdYlGn") +
       coord_quickmap() +
       theme(legend.position = "bottom")+
+      labs(fill = conversion_list2[input$type1])+
       
       if(input$type2 == "change"){
         labs(title = paste("Change in" , input$type1 , "from 2010 to 2015"))  
