@@ -142,6 +142,8 @@ my_server <-  function(input, output){
   })
 }
 
+
+
 #does the first page of the shiny
 page_one <- tabPanel( "World Map",
   sidebarLayout(
@@ -177,7 +179,6 @@ page_two <-  tabPanel( "Graphs",
                            selectInput( inputId = "type3", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
                            selectInput( inputId = "type4", label = "Filter by region:", choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
                            #selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
-                           
                          ),
                          mainPanel(    # lay out the passed content inside the "main" column
                            textOutput(outputId = "messagetwo"),
@@ -187,11 +188,13 @@ page_two <-  tabPanel( "Graphs",
                          )
                        )
 )
+page_three <-  tabPanel( "Summary", titlePanel(""), h1(""))
 
-#does the second page of the shiny.
-thegraph <- ggplot(selected_complete_data, na.rm = T) +
-  geom_point(mapping = aes(y = Life_expectancy, x = Fertility_rate))
+page_four <-  tabPanel( "Source", titlePanel(""), h1(""))
 
-my_ui <- navbarPage("My application", page_one, page_two)
+page_zero <-  tabPanel( "Introduction", titlePanel(""), h1(""))
+
+
+my_ui <- navbarPage("My application", page_zero ,page_one, page_two, page_three, page_four)
 
 shinyApp(ui = my_ui, server = my_server)
