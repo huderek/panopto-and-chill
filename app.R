@@ -188,9 +188,7 @@ page_two <-  tabPanel( "Graphs",
                        )
 )
 
-#does the second page of the shiny.
-thegraph <- ggplot(selected_complete_data, na.rm = T) +
-  geom_point(mapping = aes(y = Life_expectancy, x = Fertility_rate))
+
 
 my_ui <- navbarPage("My application", page_one, page_two)
 
