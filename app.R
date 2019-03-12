@@ -120,27 +120,35 @@ my_server <-  function(input, output){
     if(input$type3 == "GDP_millions_of_USD"){
       column <- regioned$GDP_millions_of_USD
       rakes <- c(0,995,3900,12055, Inf)
-      bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
-                                                                    paste(rakes[2],"to",rakes[3]), 
-                                                                    paste(rakes[3],"to",rakes[4]), 
-                                                                    paste(rakes[4],"to",rakes[5])))
+      bins = cut(column,breaks = rakes, labels=c(paste0("$",rakes[1]," to $",rakes[2]), 
+                                                       paste0("$",rakes[2]," to $",rakes[3]), 
+                                                       paste0("$", rakes[3]," to $", rakes[4]), 
+                                                       paste0("Greater than $",rakes[4])))
       regioned <- mutate(regioned, bins) 
     }
     else{
       column <- regioned$GDP_per_capita_USD
       rakes <- c(0,32,5000,40000, Inf)
-      bins = cut(column, breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
-                                                  paste(rakes[2],"to",rakes[3]), 
-                                                  paste(rakes[3],"to",rakes[4]), 
-                                                  paste(rakes[4],"to",rakes[5])))
+      bins = cut(column, breaks = rakes, labels=c(paste0("$",rakes[1]," to $",rakes[2]), 
+                                                  paste0("$",rakes[2]," to $",rakes[3]), 
+                                                  paste0("$", rakes[3]," to $", rakes[4]), 
+                                                  paste0("Greater than $",rakes[4])))
       regioned <-  mutate(regioned, bins)
     }
     
     thegraph <- ggplot(regioned, na.rm = T) +
-      geom_point(mapping = aes_string(y = input$radio_key , x = input$select_key2, color = bins ))
+      geom_point(mapping = aes_string(y = input$radio_key , x = input$select_key2, color = bins )) +
+      
+      if(input$type3 == "GDP_per_capita_USD"){
+        labs(colour = "GDP per capita (USD)")  
+      }else{
+        labs(colour = "GDP (USD in millions)") 
+      }
   thegraph
   })
 }
+
+
 
 #does the first page of the shiny
 page_one <- tabPanel( "World Map",
@@ -177,7 +185,6 @@ page_two <-  tabPanel( "Graphs",
                            selectInput( inputId = "type3", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
                            selectInput( inputId = "type4", label = "Filter by region:", choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
                            #selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
-                           
                          ),
                          mainPanel(    # lay out the passed content inside the "main" column
                            textOutput(outputId = "messagetwo"),
@@ -187,11 +194,18 @@ page_two <-  tabPanel( "Graphs",
                          )
                        )
 )
+page_three <-  tabPanel( "Summary", titlePanel(""), h1(""))
 
-#does the second page of the shiny.
-thegraph <- ggplot(selected_complete_data, na.rm = T) +
-  geom_point(mapping = aes(y = Life_expectancy, x = Fertility_rate))
+page_four <-  tabPanel( "Source", titlePanel("Works Cited"), 
+gdp_data <- a("GDP Data Source", href ="http://data.un.org/_Docs/SYB/PDFs/SYB60_T03_Population%20Growth,%20Fertility%20and%20Mortality%20Indicators.pdf"),
+p(life_exp_url <- a("Population Data Source", href= "http://data.un.org/_Docs/SYB/PDFs/SYB61_T13_GDP%20and%20GDP%20Per%20Capita.pdf")))
 
-my_ui <- navbarPage("My application", page_one, page_two)
+
+
+
+page_zero <-  tabPanel( "Introduction", titlePanel(""), h1(""))
+
+
+my_ui <- navbarPage("My application", page_zero ,page_one, page_two, page_three, page_four)
 
 shinyApp(ui = my_ui, server = my_server)
