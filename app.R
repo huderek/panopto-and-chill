@@ -67,17 +67,23 @@ my_server <-  function(input, output){
  
     if(input$type2 == "yr2010"){
       column <- as.numeric(world_pop_map$yr2010)
-      rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
+
+
+      rakes <- quantile(column , prob = c(0, 0.1, 0.4, 0.6, 0.9, 1), na.rm = T)
+
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
                                                  paste(rakes[3],"to",rakes[4]), 
                                                  paste(rakes[4],"to",rakes[5]),
                                                  paste(rakes[5],"to",rakes[6])))
       world_pop_map <- mutate(world_pop_map, bins) 
+
     }
     else if(input$type2 == "yr2015"){
       column <- as.numeric(world_pop_map$yr2015)
-      rakes <- quantile(column , prob = c(0, 0.2, 0.4, 0.6, 0.8, 1), na.rm = T)
+
+      rakes <- quantile(column , prob = c(0, 0.1, 0.4, 0.6, 0.9, 1), na.rm = T)
+
       bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
                                                  paste(rakes[2],"to",rakes[3]), 
                                                  paste(rakes[3],"to",rakes[4]), 
@@ -87,12 +93,19 @@ my_server <-  function(input, output){
     }
     else{
       column <- as.numeric(world_pop_map$change)
-      rakes <- round(quantile(column , prob = c(0, 0.3, 0.6, 0.9, 1), na.rm = T), 4)
-      bins = cut(column,breaks = rakes, labels=c(paste(rakes[1],"to",rakes[2]), 
-                                                 paste(rakes[2],"to",rakes[3]), 
-                                                 paste(rakes[3],"to",rakes[4]), 
-                                                 paste(rakes[4],"to",rakes[5])))
+
       world_pop_map <- mutate(world_pop_map, bins) 
+
+      rakes <- round(quantile(column, prob = c(0, 0.3, 0.6, 0.9, 1), na.rm = T), 4)
+      bins <- cut(column, breaks = rakes, labels = c(
+        paste(rakes[1], "to", rakes[2]),
+        paste(rakes[2], "to", rakes[3]),
+        paste(rakes[3], "to", rakes[4]),
+        paste(rakes[4], "to", rakes[5])
+      ))
+      world_pop_map <- mutate(world_pop_map, bins)
+
+
     }
     conversion_list2 <- list("Infant mortality for both sexes (per 1,000 live births)"  = "Infant mortality per 1,000 live births" ,
                             "Life expectancy at birth for both sexes (years)"   = "Life expectancy in years",
@@ -107,7 +120,7 @@ my_server <-  function(input, output){
       scale_fill_brewer(palette = "RdYlGn") +
       coord_quickmap() +
       theme(legend.position = "bottom")+
-      labs(fill = conversion_list2[input$type1])
+      labs(fill = conversion_list2[input$type1])+
       
       if(input$type2 == "change"){
         labs(title = paste("Change in" , input$type1 , "from 2010 to 2015"))  
@@ -205,6 +218,7 @@ page_two <-  tabPanel( "Graphs",
 )
 page_three <-  tabPanel( "Summary", titlePanel(""), h1(""))
 
+
 page_four <-  tabPanel( "Source", 
                         titlePanel("Works Cited"), 
 gdp_data <- a("GDP Data Source", 
@@ -213,11 +227,30 @@ p(life_exp_url <- a("Population Data Source",
                     href= "http://data.un.org/_Docs/SYB/PDFs/SYB61_T13_GDP%20and%20GDP%20Per%20Capita.pdf")))
 
 
+page_three <- tabPanel(
+  "Summary", titlePanel("Summary of the Program:"),
+  strong("1. Does a higher fertility rate necessarily result in a higher annual rate of population growth?"),
+  p("Higher fertility should theoretically correlate with a higher annual rate of population. While there is a linear correlation, 
+  the slope of line is much less than 1. This is due to deaths and migration from nations, which wouldn't allow for a 1:1 ratio of fertility. 
+  We also found that countries with higher GDP generally tend to have lower annual population growth and fertility. This may be because wealthier nations
+  don't have to have children for economic reasons."),
+
+
+  strong("3. Infant mortality vs. fertility rates"),
+  p("When comparing fertility rates to infant mortality, we found that countries with lower GDP per capita saw higher rates of both fertility and infant mortality. 
+  High infant mortality can be attributed to lack of adequate healthcare systems in countries with low GDP per capita. Intuition suggests that lower GDP would result 
+  in lower fertility rates, because it's costly to raise a child. In reality, many countries with lower GDP also can utilize children as a financial asset to do work that requires manual labor. 
+  The opposite is true in countries like the US, where children are seen as a financial costs, not an investment. Although morbid, high fertility can be attributed to high infant mortality rate as well,
+  as parents may look to replace children that die in infancy. Using our region filter widget, we found that European nations generally tend to have the lowest infant mortality and fertility rates.
+  African nations have the highest in both categories."))
 
 
 page_zero <-  tabPanel( "Introduction", titlePanel(""), h1(""))
 
 
+
 my_ui <- navbarPage("My application", page_zero ,page_one, page_two, page_three, page_four)
+
+
 
 shinyApp(ui = my_ui, server = my_server)
