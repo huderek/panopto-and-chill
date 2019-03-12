@@ -255,7 +255,6 @@ The bins are based on UN classifications of Low Income, Lower Middle Income, Hig
 One can plot a variable against itself to see how it is affected by GDP/GDP per capita.")
 )
 
-
 my_ui <- navbarPage("Life Expectancy Analysis", page_zero, page_one, page_two, page_three, page_four)
 
 shinyApp(ui = my_ui, server = my_server)
