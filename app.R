@@ -314,13 +314,8 @@ page_two <-  tabPanel( "Question 2",
 
                          )
                        ),
-                       strong("3. Infant Mortality vs. Fertility Rates"),
-                       p("When comparing fertility rates to infant mortality, we found that countries with lower GDP per capita saw higher rates of both fertility and infant mortality. 
-                         High infant mortality can be attributed to lack of adequate healthcare systems in countries with low GDP per capita. Intuition suggests that lower GDP would result 
-                         in lower fertility rates, because it's costly to raise a child. In reality, many countries with lower GDP also can utilize children as a financial asset to do work that requires manual labor. 
-                         The opposite is true in countries like the US, where children are seen as a financial costs, not an investment. Although morbid, high fertility can be attributed to high infant mortality rate as well,
-                         as parents may look to replace children that die in infancy. Using our region filter widget, we found that European nations generally tend to have the lowest infant mortality and fertility rates.
-                         African nations have the highest in both categories.All three health parametres seem to have a very high correlation with GDP per capita thus confirming our hypothesis.
+                       strong("2. Infant Mortality vs. Fertility Rates"),
+                       p("All three health parametres seem to have a very high correlation with GDP per capita thus confirming our hypothesis.
                          The maternal mortality rate and infant mortality rate have very high negative correlations with GDPper capita. This makes sense because individuals with
                          higher average income can spend more on healthcare facilities. GDP per capita is also a determining factor in economic development and infrastructure because it implies low unemployment.
                          As a result, people in these countries can focus more on their helathcare needs."), 
