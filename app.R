@@ -159,7 +159,7 @@ my_server <-  function(input, output){
     }
     
     thegraph <- ggplot(regioned, na.rm = T) +
-      geom_point(mapping = aes_string(y = input$radio_key , x = input$select_key2, color = bins )) +
+      geom_point(mapping = aes_string(x = "Annual_population__rate_of_change" , y = "Fertility_rate", color = bins )) +
       
       if(input$type3 == "GDP_per_capita_USD"){
         labs(colour = "GDP per capita (USD)")  
@@ -200,10 +200,7 @@ page_two <-  tabPanel( "Graphs",
                        sidebarLayout(  # lay out the passed content into two columns
                          sidebarPanel( # lay out the passed content inside the "sidebar" column
                            radioButtons(inputId = "rb_yr", label = "Pick a year", choices = c(2010,2015 )),
-                           selectInput( inputId = "select_key2", label = "Choose the independant variable (x-axis)",
-                                        choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate")),
-                           radioButtons( inputId = "radio_key", label = "Choose an dependant variable (y-axis)",
-                                         choices = c("Infant mortality"="Infant_mortality", "Life expectancy"="Life_expectancy", "Maternal mortality ratio"="Maternal_mortality_ratio", "Annual population rate of change"="Annual_population__rate_of_change", "Fertility rate"="Fertility_rate")),
+                           
                            selectInput( inputId = "type3", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
                            selectInput( inputId = "type4", label = "Filter by region:", choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
                            #selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
@@ -216,7 +213,7 @@ page_two <-  tabPanel( "Graphs",
                          )
                        )
 )
-page_three <-  tabPanel( "Summary", titlePanel(""), h1(""))
+
 
 
 page_four <-  tabPanel( "Source", 
@@ -228,28 +225,34 @@ p(life_exp_url <- a("Population Data Source",
 
 
 page_three <- tabPanel(
-  "Summary", titlePanel("Summary of the Program:"),
-  strong("1. Does a higher fertility rate necessarily result in a higher annual rate of population growth?"),
-  p("Higher fertility should theoretically correlate with a higher annual rate of population. While there is a linear correlation, 
-  the slope of line is much less than 1. This is due to deaths and migration from nations, which wouldn't allow for a 1:1 ratio of fertility. 
-  We also found that countries with higher GDP generally tend to have lower annual population growth and fertility. This may be because wealthier nations
-  don't have to have children for economic reasons."),
+
+  "Graphs2",
+  titlePanel("Visualization"),
+  sidebarLayout( # lay out the passed content into two columns
+    sidebarPanel( # lay out the passed content inside the "sidebar" column
+      radioButtons(inputId = "rb_yr", label = "Pick a year", choices = c(2010, 2015)),
+      
+      
+      selectInput(inputId = "type3", label = "Color by:", choices = c("GDP per capita USD" = "GDP_per_capita_USD", "GDP millions of USD" = "GDP_millions_of_USD")),
+      selectInput(inputId = "type4", label = "Filter by region:", choices = c("All", "Africa", "Americas", "Asia", "Europe", "Oceania"))
+      # selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
+    ),
+    mainPanel( # lay out the passed content inside the "main" column
+      textOutput(outputId = "messagetwo"),
+      span(textOutput("header"), style = "font-size:25px"),
+      plotOutput(outputId = "graph"),
+      textOutput("sentance")
+    )
+  )
+)
 
 
-  strong("3. Infant mortality vs. fertility rates"),
-  p("When comparing fertility rates to infant mortality, we found that countries with lower GDP per capita saw higher rates of both fertility and infant mortality. 
-  High infant mortality can be attributed to lack of adequate healthcare systems in countries with low GDP per capita. Intuition suggests that lower GDP would result 
-  in lower fertility rates, because it's costly to raise a child. In reality, many countries with lower GDP also can utilize children as a financial asset to do work that requires manual labor. 
-  The opposite is true in countries like the US, where children are seen as a financial costs, not an investment. Although morbid, high fertility can be attributed to high infant mortality rate as well,
-  as parents may look to replace children that die in infancy. Using our region filter widget, we found that European nations generally tend to have the lowest infant mortality and fertility rates.
-  African nations have the highest in both categories."))
+page_zero <- tabPanel(
+  "Introduction", titlePanel("Introduction for the webPage:")
+)
 
 
-page_zero <-  tabPanel( "Introduction", titlePanel(""), h1(""))
-
-
-
-my_ui <- navbarPage("My application", page_zero ,page_one, page_two, page_three, page_four)
+my_ui <- navbarPage("My application", page_zero ,page_one,page_two, page_three, page_four)
 
 
 
