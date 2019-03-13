@@ -209,32 +209,30 @@ page_two <- tabPanel(
 
 
 page_three <- tabPanel(
-  "Summary", titlePanel("Summary of the Program:"),
-  strong("1. Does a higher fertility rate necessarily result in a higher annual rate of population growth?"),
-  p("Higher fertility should theoretically correlate with a higher annual rate of population. While there is a linear correlation, 
-  the slope of line is much less than 1. This is due to deaths and migration from nations, which wouldn't allow for a 1:1 ratio of fertility. 
-  We also found that countries with higher GDP generally tend to have lower annual population growth and fertility. This may be because wealthier nations
-  don't have to have children for economic reasons."),
-
-  strong("2. How has the life expectancy of countries changed from 2010 to 2015?"),
-  p("We thought it would be interesting to see the relationship between life expectancy and the GDP per capita because it represents the income of the average resident. 
-  Higher income should logically result in being able to afford better healthcare. Life expectancy has not changed by a large amount between 2010 and 2015. Although the lowest 10% of the changes were negative, 
-  most countries performed well, especially in Asia. As expected, the life expectancy in countries with higher GDP per capita tends to be higher than countries in the low income bracket. "),
-
-
-
-  strong("3. Infant mortality vs. fertility rates"),
-  p("When comparing fertility rates to infant mortality, we found that countries with lower GDP per capita saw higher rates of both fertility and infant mortality. 
-  High infant mortality can be attributed to lack of adequate healthcare systems in countries with low GDP per capita. Intuition suggests that lower GDP would result 
-  in lower fertility rates, because it's costly to raise a child. In reality, many countries with lower GDP also can utilize children as a financial asset to do work that requires manual labor. 
-  The opposite is true in countries like the US, where children are seen as a financial costs, not an investment. Although morbid, high fertility can be attributed to high infant mortality rate as well,
-  as parents may look to replace children that die in infancy. Using our region filter widget, we found that European nations generally tend to have the lowest infant mortality and fertility rates.
-  African nations have the highest in both categories."),
-
-  strong("4. Annual population rate of change vs. life expectancy"),
-  p("We were curious to see if the population has an effect on the life expectancy of a country. It turns out that there might be a weak linear correlation between the two. 
-  Although more advanced analysis is needed to confirm this. It is possible to explain this relationship as follows; countries with lower rate of population change have fewer people and thus more access 
-  to healthcare facilities per person.")
+  "Graphs2",
+  titlePanel("Visualization"),
+  sidebarLayout( # lay out the passed content into two columns
+    sidebarPanel( # lay out the passed content inside the "sidebar" column
+      radioButtons(inputId = "rb_yr", label = "Pick a year", choices = c(2010, 2015)),
+      selectInput(
+        inputId = "select_key2", label = "Choose the independant variable (x-axis)",
+        choices = c("Infant mortality" = "Infant_mortality", "Life expectancy" = "Life_expectancy", "Maternal mortality ratio" = "Maternal_mortality_ratio", "Annual population rate of change" = "Annual_population__rate_of_change", "Fertility rate" = "Fertility_rate")
+      ),
+      radioButtons(
+        inputId = "radio_key", label = "Choose an dependant variable (y-axis)",
+        choices = c("Infant mortality" = "Infant_mortality", "Life expectancy" = "Life_expectancy", "Maternal mortality ratio" = "Maternal_mortality_ratio", "Annual population rate of change" = "Annual_population__rate_of_change", "Fertility rate" = "Fertility_rate")
+      ),
+      selectInput(inputId = "type3", label = "Color by:", choices = c("GDP per capita USD" = "GDP_per_capita_USD", "GDP millions of USD" = "GDP_millions_of_USD")),
+      selectInput(inputId = "type4", label = "Filter by region:", choices = c("All", "Africa", "Americas", "Asia", "Europe", "Oceania"))
+      # selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
+    ),
+    mainPanel( # lay out the passed content inside the "main" column
+      textOutput(outputId = "messagetwo"),
+      span(textOutput("header"), style = "font-size:25px"),
+      plotOutput(outputId = "graph"),
+      textOutput("sentance")
+    )
+  )
 )
 
 page_four <- tabPanel(
@@ -244,15 +242,7 @@ page_four <- tabPanel(
 )
 
 page_zero <- tabPanel(
-  "Introduction", titlePanel("Introduction for the webPage:"),
-  p("This app application utilizes GDP data and healthcare data gathered from the UN website. There are two visualization tabs. The first one contains a choropleth map on which one 
-can plug in a wide range of data for the years 2010 and 2015 as well as the change between those two years. This visualization was used to determine how health statistics around the world
-compared as well as changed from 2010 and 2015."),
-
-  p("The other visualization is a graph on which one can plot variables against each other. We primarily use this visualization to answer our questions.
-Each data point on the graph represents a country. The data points can be filtered by Regions as defined by the UN. The data points a colored based on GDP or GDP per capita bins. 
-The bins are based on UN classifications of Low Income, Lower Middle Income, Higher Middle Income and High Income.
-One can plot a variable against itself to see how it is affected by GDP/GDP per capita.")
+  "Introduction", titlePanel("Introduction for the webPage:")
 )
 
 my_ui <- navbarPage("Life Expectancy Analysis", page_zero, page_one, page_two, page_three, page_four)
