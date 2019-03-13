@@ -231,8 +231,8 @@ page_two <-  tabPanel( "Graphs",
                          mainPanel(    # lay out the passed content inside the "main" column
                            textOutput(outputId = "messagetwo"),
                            span(textOutput("header"),style="font-size:25px"),
-                           plotOutput(outputId = "graph")#,
-                           #textOutput("sentence")
+                           plotOutput(outputId = "graph"),
+                           textOutput("sentence")
                          )
                        )
 )
