@@ -153,10 +153,41 @@ my_server <-  function(input, output){
 
   
   
-output$test <-renderPlot({
+output$q1 <-renderPlot({
+  
+  
   year <- filter(selected_complete_data, Year == input$year3)
-  ggplot(year, na.rm = T)+
-    geom_point(mapping = aes_string(x = "Annual_population__rate_of_change" , y = "Fertility_rate"))
+  if(input$region1 == "All"){
+    by_region <- year
+  }else{
+by_region <- filter(year, region == input$region1)
+  }
+  
+  if(input$bygdp == "GDP_millions_of_USD"){
+    column <- by_region$GDP_millions_of_USD
+    rakes <- c(0,995,3900,12055, Inf)
+    bins = cut(column,breaks = rakes, labels=c(paste0("$",rakes[1]," to $",rakes[2]), 
+                                               paste0("$",rakes[2]," to $",rakes[3]), 
+                                               paste0("$", rakes[3]," to $", rakes[4]), 
+                                               paste0("Greater than $",rakes[4])))
+    by_region <- mutate(by_region, bins) 
+  }
+  else{
+    column <- by_region$GDP_per_capita_USD
+    rakes <- c(0,32,5000,40000, Inf)
+    bins = cut(column, breaks = rakes, labels=c(paste0("$",rakes[1]," to $",rakes[2]), 
+                                                paste0("$",rakes[2]," to $",rakes[3]), 
+                                                paste0("$", rakes[3]," to $", rakes[4]), 
+                                                paste0("Greater than $",rakes[4])))
+    by_region <-  mutate(by_region, bins)
+  }
+  ggplot(by_region, na.rm = T)+
+    geom_point(mapping = aes_string(x = "Annual_population__rate_of_change" , y = "Fertility_rate", color = bins))+
+    if(input$bygdp == "GDP_per_capita_USD"){
+      labs(colour = "GDP per capita (USD)")  
+    }else{
+      labs(colour = "GDP (USD in millions)") 
+    }
   
   
 })
@@ -195,6 +226,7 @@ output$question4 <-renderPlot({
       labs(colour = "GDP (USD in millions)") 
     }
   q4_graph
+
 })
 
 }
@@ -225,10 +257,9 @@ page_one <- tabPanel( "Question 1",
       
     )
   ),
-  strong("2. How has the life expectancy of countries changed from 2010 to 2015?"),
-  p("We thought it would be interesting to see the relationship between life expectancy and the GDP per capita because it represents the income of the average resident. 
-    Higher income should logically result in being able to afford better healthcare. Life expectancy has not changed by a large amount between 2010 and 2015. Although the lowest 10% of the changes were negative, 
-    most countries performed well, especially in Asia. As expected, the life expectancy in countries with higher GDP per capita tends to be higher than countries in the low income bracket. ")
+  strong("1. How Have Healthcare Parametres of Countries changed from 2010 to 2015?"),
+  p("We picked 3 of the many parameters used to evaluate the healthcare index by the WHO. We picked these because we believe they have significant impact on the healthcare index and also the data for these parameters were easily available. 
+This visualization helps one determine what the life expectancy, infant mortality rate and maternal mortality rate were in 2015, 2010 as well as the change in these parameters over those years. Since it is a world map one can easily tell which regions performs the best while which regions performed the worst. The map is augmented by bins that are based on quantiles. Red represents the worst performing 10% while dark green represents the best performing 10%. The other break offs are at 40%, 60% and 90%.")
 )
 
 page_two <-  tabPanel( "Question 2",
@@ -255,22 +286,27 @@ page_two <-  tabPanel( "Question 2",
                          African nations have the highest in both categories.")
 )
 
-page_four <-  tabPanel( "Source", 
+page_four <-  tabPanel( "Sources", 
                         titlePanel("Works Cited"), 
 gdp_data <- a("GDP Data Source", 
               href ="http://data.un.org/_Docs/SYB/PDFs/SYB60_T03_Population%20Growth,%20Fertility%20and%20Mortality%20Indicators.pdf"),
 p(life_exp_url <- a("Population Data Source", 
                     href= "http://data.un.org/_Docs/SYB/PDFs/SYB61_T13_GDP%20and%20GDP%20Per%20Capita.pdf")))
 
+
 page_three <- tabPanel("Question 3",
-                       titlePanel("graph7"), sidebarLayout(
+                       titlePanel("Does a Higher Fertility Rate Necessarily Result in a Higher Annual Rate of Population Growth?"), 
+                       sidebarLayout(
                          sidebarPanel(
-                           radioButtons(inputId = "year3", label = "Pick a year", choices = c(2010,2015 ))
+                           radioButtons(inputId = "year3", label = "Pick a year", choices = c(2010,2015 )),
+                           selectInput(inputId = "region1", label = "Pick a region",choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania")),
+                           radioButtons( inputId = "bygdp", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD"))
                          ),
                          mainPanel(
-                           plotOutput(outputId = "test" )
+                           plotOutput(outputId = "q1" ) 
                          )
-                       )
+                       ),
+                       p("Higher fertility should theoretically correlate with a higher annual rate of population. While there is a linear correlation, the slope of line is much less than 1. This is due to deaths and migration from nations, which wouldn’t allow for a 1:1 ratio of fertility. We also found that countries with higher GDP generally tend to have lower annual population growth and fertility. This may be because wealthier nations don’t have to have children for economic reasons.")
   
 )
 
@@ -297,19 +333,15 @@ page_five <- tabPanel("Question 4",
 
 
 page_zero <- tabPanel(
-  "Introduction", titlePanel("Introduction for the webPage:"),
-  p("This app application utilizes GDP data and healthcare data gathered from the UN website. There are two visualization tabs. The first one contains a choropleth map on which one 
-    can plug in a wide range of data for the years 2010 and 2015 as well as the change between those two years. This visualization was used to determine how health statistics around the world
-    compared as well as changed from 2010 and 2015."),
-  
-  p("The other visualization is a graph on which one can plot variables against each other. We primarily use this visualization to answer our questions.
-    Each data point on the graph represents a country. The data points can be filtered by Regions as defined by the UN. The data points a colored based on GDP or GDP per capita bins. 
-    The bins are based on UN classifications of Low Income, Lower Middle Income, Higher Middle Income and High Income.
-    One can plot a variable against itself to see how it is affected by GDP/GDP per capita.")
+  "Introduction", titlePanel("Introduction"),
+  p("This application uses GDP and healthcare country data gathered from the United Nations. There are four visualization tabs aimed to answer four questions we had about healthcare and GDP. 
+    Question 1 aims to answer how have healthcare statistic changed from 2010 to 2015. The user can toggle between different healthcare stats. 
+    Question 2 looks into the relationship between fertility rates and infant mortality. Question 3 studies the correlation between fertility and population growth. 
+    Finally, Question 4 studies the the relationship between the population rate of change and life expectancy of countries. All visualizalizations allow the user to toggle between years and regions for further analysis. ")
 )
 
 
-my_ui <- navbarPage("My application", page_zero ,page_one, page_two,page_three,page_five,page_four)
+my_ui <- navbarPage("GDP & Healthcare Analysis", page_zero ,page_one, page_two,page_three,page_five,page_four)
 
 
 
