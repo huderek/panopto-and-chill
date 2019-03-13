@@ -94,15 +94,11 @@ my_server <-  function(input, output){
     else{
       column <- as.numeric(world_pop_map$change)
 
-      world_pop_map <- mutate(world_pop_map, bins) 
-
       rakes <- round(quantile(column, prob = c(0, 0.3, 0.6, 0.9, 1), na.rm = T), 4)
-      bins <- cut(column, breaks = rakes, labels = c(
-        paste(rakes[1], "to", rakes[2]),
-        paste(rakes[2], "to", rakes[3]),
-        paste(rakes[3], "to", rakes[4]),
-        paste(rakes[4], "to", rakes[5])
-      ))
+      bins = cut(column, breaks = rakes, labels = c(paste(rakes[1], "to", rakes[2]),
+                                                    paste(rakes[2], "to", rakes[3]),
+                                                    paste(rakes[3], "to", rakes[4]),
+                                                    paste(rakes[4], "to", rakes[5])))
       world_pop_map <- mutate(world_pop_map, bins)
 
 
@@ -120,7 +116,7 @@ my_server <-  function(input, output){
       scale_fill_brewer(palette = "RdYlGn") +
       coord_quickmap() +
       theme(legend.position = "bottom")+
-      labs(fill = conversion_list2[input$type1])+
+      labs(fill = conversion_list2[input$type1]) 
       
       if(input$type2 == "change"){
         labs(title = paste("Change in" , input$type1 , "from 2010 to 2015"))  
@@ -170,6 +166,7 @@ my_server <-  function(input, output){
   })
 
   
+  
 output$test <-renderPlot({
   year <- filter(selected_complete_data, Year == input$year3)
   ggplot(year, na.rm = T)+
@@ -181,7 +178,7 @@ output$test <-renderPlot({
 output$page4 <-renderPlot({
   year <- filter(selected_complete_data, Year == input$year)
   ggplot(year, na.rm = T)+
-    geom_point(mapping = aes_string(x = "Annual_population__rate_of_change" , y = "Fertility_rate"))
+    geom_point(mapping = aes_string(x = "Annual_population__rate_of_change" , y = "Fertility_rate")) 
   
   
 })
@@ -193,41 +190,49 @@ output$page4 <-renderPlot({
 
 #does the first page of the shiny
 page_one <- tabPanel( "World Map",
+                      titlePanel("How have healthcare statistics of Countries changed from 2010 to 2015?"), 
   sidebarLayout(
     # interaction panel
     sidebarPanel(
       ## select the features to display
       radioButtons(
-        inputId = "type2", label = "Data Type", choices =
-          c("yr2010", "yr2015", "change")
+        inputId = "type2", label = "Data Type" , choices =
+          c("2010"= "yr2010","2015" = "yr2015","change" = "change")
       ),
       selectInput(
         inputId = "type1", label = "trend",
-        unique(gather_pop$trend)
+        choices = c("Infant mortality for both sexes (per 1,000 live births)", "Life expectancy at birth for both sexes (years)", 
+                    "Maternal mortality ratio (deaths per 100,000 population)") 
       )
     ),
     # display panel
     mainPanel(
-
-      textOutput("selected_var1"), plotOutput("plot")
+        
+      textOutput("selected_var1"), 
+      plotOutput("plot")
+      
     )
-  ) 
+  ),
+  strong("2. How has the life expectancy of countries changed from 2010 to 2015?"),
+  p("We thought it would be interesting to see the relationship between life expectancy and the GDP per capita because it represents the income of the average resident. 
+    Higher income should logically result in being able to afford better healthcare. Life expectancy has not changed by a large amount between 2010 and 2015. Although the lowest 10% of the changes were negative, 
+    most countries performed well, especially in Asia. As expected, the life expectancy in countries with higher GDP per capita tends to be higher than countries in the low income bracket. ")
 )
-       #textOutput("selected_var1") 
+ 
 page_two <-  tabPanel( "Graphs",
                        titlePanel("Visualization"),
                        sidebarLayout(  # lay out the passed content into two columns
                          sidebarPanel( # lay out the passed content inside the "sidebar" column
-                           radioButtons(inputId = "rb_yr1", label = "Pick a year", choices = c(2010,2015 )),
+                           radioButtons(inputId = "rb_yr", label = "Pick a year", choices = c(2010,2015 )),
                            
-                           selectInput( inputId = "type30", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
-                           selectInput( inputId = "type40", label = "Filter by region:", choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
+                           selectInput( inputId = "type3", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
+                           selectInput( inputId = "type4", label = "Filter by region:", choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
                          ),
                          mainPanel(    # lay out the passed content inside the "main" column
                            textOutput(outputId = "messagetwo"),
                            span(textOutput("header"),style="font-size:25px"),
-                           plotOutput(outputId = "graph2"),
-                           textOutput("sentence")
+                           plotOutput(outputId = "graph")#,
+                           #textOutput("sentence")
                          )
                        )
 )
@@ -257,7 +262,7 @@ page_three <- tabPanel("Graph5",
 page_five <- tabPanel("page 4",
                        titlePanel("graph6"), sidebarLayout(
                          sidebarPanel(
-                           radioButtons(inputId = "year", label = "Pick a year", choices = c(2010,2015 ))
+                           radioButtons(inputId = "year", label = "Pick a year", choices = c(2010,2015))
                          ),
                          mainPanel(
                            plotOutput(outputId = "page4" )
