@@ -168,6 +168,45 @@ my_server <-  function(input, output){
       }
   thegraph
   })
+  output$graph2 <- renderPlot({
+    
+    by_yr <- filter(selected_complete_data, Year == input$rb_yr1)
+    
+    if(input$type40 == "All"){
+      regioned <- by_yr
+    }else{
+      regioned <- filter(by_yr, region == input$type4)
+    }
+    
+    if(input$type30 == "GDP_millions_of_USD"){
+      column <- regioned$GDP_millions_of_USD
+      rakes <- c(0,995,3900,12055, Inf)
+      bins = cut(column,breaks = rakes, labels=c(paste0("$",rakes[1]," to $",rakes[2]), 
+                                                 paste0("$",rakes[2]," to $",rakes[3]), 
+                                                 paste0("$", rakes[3]," to $", rakes[4]), 
+                                                 paste0("Greater than $",rakes[4])))
+      regioned <- mutate(regioned, bins) 
+    }
+    else{
+      column <- regioned$GDP_per_capita_USD
+      rakes <- c(0,32,5000,40000, Inf)
+      bins = cut(column, breaks = rakes, labels=c(paste0("$",rakes[1]," to $",rakes[2]), 
+                                                  paste0("$",rakes[2]," to $",rakes[3]), 
+                                                  paste0("$", rakes[3]," to $", rakes[4]), 
+                                                  paste0("Greater than $",rakes[4])))
+      regioned <-  mutate(regioned, bins)
+    }
+    
+    thegraph2 <- ggplot(regioned, na.rm = T) +
+      geom_point(mapping = aes_string(x = "Annual_population__rate_of_change" , y = "Fertility_rate", color = bins )) +
+      
+      if(input$type30 == "GDP_per_capita_USD"){
+        labs(colour = "GDP per capita (USD)")  
+      }else{
+        labs(colour = "GDP (USD in millions)") 
+      }
+    thegraph2
+  })
 }
 
 
@@ -199,17 +238,16 @@ page_two <-  tabPanel( "Graphs",
                        titlePanel("Visualization"),
                        sidebarLayout(  # lay out the passed content into two columns
                          sidebarPanel( # lay out the passed content inside the "sidebar" column
-                           radioButtons(inputId = "rb_yr", label = "Pick a year", choices = c(2010,2015 )),
+                           radioButtons(inputId = "rb_yr1", label = "Pick a year", choices = c(2010,2015 )),
                            
-                           selectInput( inputId = "type3", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
-                           selectInput( inputId = "type4", label = "Filter by region:", choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
-                           #selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
+                           selectInput( inputId = "type30", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
+                           selectInput( inputId = "type40", label = "Filter by region:", choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
                          ),
                          mainPanel(    # lay out the passed content inside the "main" column
                            textOutput(outputId = "messagetwo"),
                            span(textOutput("header"),style="font-size:25px"),
-                           plotOutput(outputId = "graph"),
-                           textOutput("sentance")
+                           plotOutput(outputId = "graph2"),
+                           textOutput("sentence")
                          )
                        )
 )
@@ -234,14 +272,12 @@ page_three <- tabPanel(
       
       
       selectInput(inputId = "type3", label = "Color by:", choices = c("GDP per capita USD" = "GDP_per_capita_USD", "GDP millions of USD" = "GDP_millions_of_USD")),
-      selectInput(inputId = "type4", label = "Filter by region:", choices = c("All", "Africa", "Americas", "Asia", "Europe", "Oceania"))
-      # selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
-    ),
+      selectInput(inputId = "type4", label = "Filter by region:", choices = c("All", "Africa", "Americas", "Asia", "Europe", "Oceania"))),
     mainPanel( # lay out the passed content inside the "main" column
       textOutput(outputId = "messagetwo"),
       span(textOutput("header"), style = "font-size:25px"),
       plotOutput(outputId = "graph"),
-      textOutput("sentance")
+      textOutput("sentence")
     )
   )
 )
