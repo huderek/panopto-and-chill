@@ -127,22 +127,43 @@ my_server <-  function(input, output){
     thegraph <- ggplot(regioned, na.rm = T) +
       geom_point(mapping = aes_string(x = log(regioned$GDP_per_capita_USD) , y = input$type3, fill = "Region")) + ##log to make trend more visible 
      theme(legend.position="none")
-      # if(input$type3 == "GDP_per_capita_USD"){
-      #   labs(x = "Infant Mortality (per 100,000)", y = "Fertility Rate (%)", colour = "GDP per capita (USD)")  
-      # }else{
-      #   labs(x = "Infant Mortality (per 100,000)", y = "Fertility Rate (%)", colour = "GDP (USD in millions)") 
-      # }
   ggplotly(thegraph)
+  })
+  
+  output$q2text <- renderText({
+    by_years <- filter(selected_complete_data, Year == input$rb_yr)
+    health_statistic <- select(by_years,Annual_population__rate_of_change,input$type3,region,Region, GDP_per_capita_USD )
+    if(input$type4 == "All"){
+      by_region_filt <- health_statistic
+    }else{
+      by_region_filt <- filter(health_statistic, region == input$type4)
+    }
+    conversion_list5 <- list("Life_expectancy"= "Life expectancy in years" ,"Fertility_rate"="Fertility Rate","Maternal_mortality_ratio"="Maternal mortallity ratio","Infant_mortality"="Infant Mortallity")
+    
+    average_GDP_new <-  mean(by_region_filt$GDP_per_capita_USD, na.rm = T)
+    average_GDP_text <- paste0("The mean GDP per capita is " , average_GDP_new)
+    average_health_statistic_new <- mean(by_region_filt[[input$type3]],na.rm = T)
+    average_health_statistic_text <- paste0("The mean of GDP per capita was " , average_GDP_new, ". and the mean of ",  conversion_list5[input$type3] , " was " ,average_health_statistic_new, " in ", input$rb_yr, " for countries in ", input$type4)
+    
+    
+    
   })
 
 ######################################################################################################################################  
   
 output$q1 <-renderPlotly({
+  if(input$the_year == "2010"){
+    by_region <- filter(selected_complete_data, Year == 2010)
+  }
+  else{
+    by_region <- filter(selected_complete_data, Year == 2015)
+  }
+  
 
   if(input$region1 == "All"){
-    by_region <- selected_complete_data
+    by_region <- by_region
   }else{
-    by_region <- filter(selected_complete_data, region == input$region1)
+    by_region <- filter(by_region, region == input$region1)
   }
   column <- by_region$GDP_per_capita_USD
   rakes <- c(0,32,5000,40000, Inf)
@@ -157,6 +178,7 @@ output$q1 <-renderPlotly({
 
 
 })
+  
 #####################################################################################
 output$question4 <-renderPlotly({
   by_yer <- filter(selected_complete_data, Year == input$year)
@@ -182,6 +204,7 @@ output$question4 <-renderPlotly({
   ggplotly(q4_graph)
   
 })
+#############################################################################################################################
 
 output$q4text <- renderText({
   by_yer <- filter(selected_complete_data, Year == input$year)
@@ -249,7 +272,8 @@ page_two <-  tabPanel( "Question 2",
                          ),
                          mainPanel(    # lay out the passed content inside the "main" column
 
-                           plotlyOutput(outputId = "graph")
+                           plotlyOutput(outputId = "graph"), 
+                           textOutput(outputId = "q2text")
 
                          )
                        ),
@@ -275,7 +299,8 @@ page_three <- tabPanel("Question 3",
                        titlePanel("Does a Higher Fertility Rate Necessarily Result in a Higher Annual Rate of Population Growth?"), 
                        sidebarLayout(
                          sidebarPanel(
-                           selectInput(inputId = "region1", label = "Pick a region",choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
+                           selectInput(inputId = "region1", label = "Pick a region",choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania")), 
+                           selectInput(inputId = "the_year", label = "Pick a year",choices = c("2010","2015"))
                          ),
                          mainPanel(
                            plotlyOutput(outputId = "q1" ) 
