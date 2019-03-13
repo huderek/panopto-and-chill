@@ -169,10 +169,41 @@ my_server <-  function(input, output){
   thegraph
   })
   
-output$test <-renderPlot({
+output$q1 <-renderPlot({
+  
+  
   year <- filter(selected_complete_data, Year == input$year3)
-  ggplot(year, na.rm = T)+
-    geom_point(mapping = aes_string(x = "Annual_population__rate_of_change" , y = "Fertility_rate"))
+  if(input$region1 == "All"){
+    by_region <- year
+  }else{
+by_region <- filter(year, region == input$region1)
+  }
+  
+  if(input$bygdp == "GDP_millions_of_USD"){
+    column <- by_region$GDP_millions_of_USD
+    rakes <- c(0,995,3900,12055, Inf)
+    bins = cut(column,breaks = rakes, labels=c(paste0("$",rakes[1]," to $",rakes[2]), 
+                                               paste0("$",rakes[2]," to $",rakes[3]), 
+                                               paste0("$", rakes[3]," to $", rakes[4]), 
+                                               paste0("Greater than $",rakes[4])))
+    by_region <- mutate(by_region, bins) 
+  }
+  else{
+    column <- by_region$GDP_per_capita_USD
+    rakes <- c(0,32,5000,40000, Inf)
+    bins = cut(column, breaks = rakes, labels=c(paste0("$",rakes[1]," to $",rakes[2]), 
+                                                paste0("$",rakes[2]," to $",rakes[3]), 
+                                                paste0("$", rakes[3]," to $", rakes[4]), 
+                                                paste0("Greater than $",rakes[4])))
+    by_region <-  mutate(by_region, bins)
+  }
+  ggplot(by_region, na.rm = T)+
+    geom_point(mapping = aes_string(x = "Annual_population__rate_of_change" , y = "Fertility_rate", color = bins))+
+    if(input$bygdp == "GDP_per_capita_USD"){
+      labs(colour = "GDP per capita (USD)")  
+    }else{
+      labs(colour = "GDP (USD in millions)") 
+    }
   
   
 })
@@ -180,7 +211,7 @@ output$test <-renderPlot({
 output$page4 <-renderPlot({
   year <- filter(selected_complete_data, Year == input$year)
   ggplot(year, na.rm = T)+
-    geom_point(mapping = aes_string(x = "Annual_population__rate_of_change" , y = "Fertility_rate"))
+    geom_point(mapping = aes_string(x = "Fertility_rate" , y = "Annual_population__rate_of_change"))
   
   
 })
@@ -240,13 +271,15 @@ gdp_data <- a("GDP Data Source",
 p(life_exp_url <- a("Population Data Source", 
                     href= "http://data.un.org/_Docs/SYB/PDFs/SYB61_T13_GDP%20and%20GDP%20Per%20Capita.pdf")))
 
-page_three <- tabPanel("Graph5",
-                       titlePanel("graph7"), sidebarLayout(
+page_three <- tabPanel("Question 1",
+                       titlePanel("Does a higher fertility rate necessarily result in a higher annual rate of population growth?"), sidebarLayout(
                          sidebarPanel(
-                           radioButtons(inputId = "year3", label = "Pick a year", choices = c(2010,2015 ))
+                           radioButtons(inputId = "year3", label = "Pick a year", choices = c(2010,2015 )),
+                           selectInput(inputId = "region1", label = "Pick a region",choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania")),
+                           radioButtons( inputId = "bygdp", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD"))
                          ),
                          mainPanel(
-                           plotOutput(outputId = "test" )
+                           plotOutput(outputId = "q1" ), p("Higher fertility should theoretically correlate with a higher annual rate of population. While there is a linear correlation, the slope of line is much less than 1. This is due to deaths and migration from nations, which wouldn’t allow for a 1:1 ratio of fertility. We also found that countries with higher GDP generally tend to have lower annual population growth and fertility. This may be because wealthier nations don’t have to have children for economic reasons.")
                          )
                        )
   
