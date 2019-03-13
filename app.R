@@ -35,19 +35,6 @@ my_server <-  function(input, output){
     world_pop_map <- left_join(world_map, data_new, by = "Country.Code") 
     
     
-    output$sentance <- renderText({
-      conversion_list <- list(
-        Infant_mortality = "Infant mortality",
-        Life_expectancy = "Life expectancy", 
-        Maternal_mortality_ratio = "Maternal mortality ratio", 
-        Annual_population__rate_of_change = "Annual population rate of change", 
-        Fertility_rate = "Fertility rate",
-        GDP_millions_of_USD = "GDP millions of USD", 
-        GDP_per_capita_USD = "GDP per capita USD"
-      )
-      paste("You are now viewing", conversion_list[input$select_key2], "VS.", conversion_list[input$radio_key], "for year", input$rb_yr, 
-            "which is colored by", conversion_list[input$type3], "and also filtered by the region of", input$type4, ".")
-    })
     
     output$header <- renderText({
       conversion_list <- list(
@@ -93,15 +80,11 @@ my_server <-  function(input, output){
     else{
       column <- as.numeric(world_pop_map$change)
 
-      world_pop_map <- mutate(world_pop_map, bins) 
-
       rakes <- round(quantile(column, prob = c(0, 0.3, 0.6, 0.9, 1), na.rm = T), 4)
-      bins <- cut(column, breaks = rakes, labels = c(
-        paste(rakes[1], "to", rakes[2]),
-        paste(rakes[2], "to", rakes[3]),
-        paste(rakes[3], "to", rakes[4]),
-        paste(rakes[4], "to", rakes[5])
-      ))
+      bins = cut(column, breaks = rakes, labels = c(paste(rakes[1], "to", rakes[2]),
+                                                    paste(rakes[2], "to", rakes[3]),
+                                                    paste(rakes[3], "to", rakes[4]),
+                                                    paste(rakes[4], "to", rakes[5])))
       world_pop_map <- mutate(world_pop_map, bins)
 
 
@@ -118,8 +101,8 @@ my_server <-  function(input, output){
       geom_polygon(mapping = aes(x = long, y = lat, group = group, fill = bins), color = "black", size = .1)  +
       scale_fill_brewer(palette = "RdYlGn") +
       coord_quickmap() +
-      theme(legend.position = "bottom")+
-      labs(fill = conversion_list2[input$type1])+
+      theme(legend.position = "bottom") +
+      labs(fill = conversion_list2[input$type1]) +
       
       if(input$type2 == "change"){
         labs(title = paste("Change in" , input$type1 , "from 2010 to 2015"))  
@@ -167,6 +150,8 @@ my_server <-  function(input, output){
       }
   thegraph
   })
+
+  
   
 output$test <-renderPlot({
   year <- filter(selected_complete_data, Year == input$year3)
@@ -211,30 +196,39 @@ output$question4 <-renderPlot({
     }
   q4_graph
 })
+
 }
 
 
 #does the first page of the shiny
-page_one <- tabPanel( "World Map",
+page_one <- tabPanel( "Question 1",
+                      titlePanel("How have Healthcare Statistics of Countries changed from 2010 to 2015?"), 
   sidebarLayout(
     # interaction panel
     sidebarPanel(
       ## select the features to display
       radioButtons(
-        inputId = "type2", label = "Data Type", choices =
-          c("yr2010", "yr2015", "change")
+        inputId = "type2", label = "Data Type" , choices =
+          c("2010"= "yr2010","2015" = "yr2015","change" = "change")
       ),
       selectInput(
         inputId = "type1", label = "trend",
-        unique(gather_pop$trend)
+        choices = c("Infant mortality for both sexes (per 1,000 live births)", "Life expectancy at birth for both sexes (years)", 
+                    "Maternal mortality ratio (deaths per 100,000 population)") 
       )
     ),
     # display panel
     mainPanel(
-
-      textOutput("selected_var1"), plotOutput("plot")
+        
+      
+      plotOutput("plot")
+      
     )
-  ) 
+  ),
+  strong("2. How has the life expectancy of countries changed from 2010 to 2015?"),
+  p("We thought it would be interesting to see the relationship between life expectancy and the GDP per capita because it represents the income of the average resident. 
+    Higher income should logically result in being able to afford better healthcare. Life expectancy has not changed by a large amount between 2010 and 2015. Although the lowest 10% of the changes were negative, 
+    most countries performed well, especially in Asia. As expected, the life expectancy in countries with higher GDP per capita tends to be higher than countries in the low income bracket. ")
 )
 
 page_two <-  tabPanel( "Question 2",
@@ -245,10 +239,11 @@ page_two <-  tabPanel( "Question 2",
                            
                            selectInput( inputId = "type3", label = "Color by:", choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
                            selectInput( inputId = "type4", label = "Filter by region:", choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))
-                           #selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
                          ),
                          mainPanel(    # lay out the passed content inside the "main" column
+
                            plotOutput(outputId = "graph")
+
                          )
                        ),
                        strong("3. Infant Mortality vs. Fertility Rates"),
@@ -278,6 +273,7 @@ page_three <- tabPanel("Question 3",
                        )
   
 )
+
 page_five <- tabPanel("Question 4",
                       titlePanel("What is Correlation between Population Rate of Change and Life Expectancy?"), 
                       sidebarLayout(
@@ -288,6 +284,7 @@ page_five <- tabPanel("Question 4",
                                         choices = c("GDP per capita USD"="GDP_per_capita_USD","GDP millions of USD" = "GDP_millions_of_USD")),
                            selectInput( inputId = "region_type", label = "Filter by region:", 
                                         choices = c("All","Africa", "Americas","Asia", "Europe", "Oceania"))),
+
                          mainPanel(
                            plotOutput(outputId = "question4" )
                          )
@@ -297,7 +294,6 @@ page_five <- tabPanel("Question 4",
   Although more advanced analysis is needed to confirm this. It is possible to explain this relationship as follows; countries with lower rate of population change have fewer people and thus more access 
   to healthcare facilities per person.")
                     )                   
-
 
 
 page_zero <- tabPanel(
