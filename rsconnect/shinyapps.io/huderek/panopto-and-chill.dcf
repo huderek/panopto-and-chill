@@ -1,0 +1,12 @@
+name: panopto-and-chill
+title: panopto-and-chill
+username:
+account: huderek
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 786056
+bundleId: 1935508
+url: https://huderek.shinyapps.io/panopto-and-chill/
+when: 1552452491.78035
+asMultiple: FALSE
+asStatic: FALSE
