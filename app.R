@@ -1,6 +1,6 @@
 # install.packages("shiny")
 # install.packages("DT")
-# install.packages("rsconnect")
+#install.packages("rsconnect")
 library("rsconnect")
 library("shiny")
 library("ggplot2")
@@ -8,10 +8,9 @@ library("dplyr")
 library("tidyr")
 library("DT")
 library("maps")
-rsconnect::setAccountInfo(
-  name = "soham-gh", token = "43013155CD55E73DD4A85A0B78A28FDD",
-  secret = "J5Ldo7vylZ9eow6mA6rE4sSLjhG4/VOJSqwEZIHP"
-)
+rsconnect::setAccountInfo(name='huderek',
+                          token='4CB1BBCC2CED4670AAF793AF88CF297E',
+                          secret='G/NJuif5jsXIUVSHWHYw3X6Hq+JhBCqq7ySX7jKb')
 options(scipen = 999)
 
 gather_pop <- read.csv("gather_pop.csv",stringsAsFactors = FALSE)
@@ -105,9 +104,9 @@ my_server <-  function(input, output){
       labs(fill = conversion_list2[input$type1]) +
       
       if(input$type2 == "change"){
-        labs(title = paste("Change in" , input$type1 , "from 2010 to 2015"))  
+        labs(x = "", y = "", title = paste("Change in" , input$type1 , "from 2010 to 2015"))  
       }else{
-        labs(title = paste(input$type1, "data from", gsub("yr","", input$type2)))
+        labs(x = "", y = "", title = paste(input$type1, "data from", gsub("yr","", input$type2)))
       }
   })
   
@@ -144,9 +143,9 @@ my_server <-  function(input, output){
       geom_point(mapping = aes_string(x = "Infant_mortality" , y = "Fertility_rate", color = bins )) +
       
       if(input$type3 == "GDP_per_capita_USD"){
-        labs(colour = "GDP per capita (USD)")  
+        labs(x = "Infant Mortality (per 100,000)", y = "Fertility Rate (%)", colour = "GDP per capita (USD)")  
       }else{
-        labs(colour = "GDP (USD in millions)") 
+        labs(x = "Infant Mortality (per 100,000)", y = "Fertility Rate (%)", colour = "GDP (USD in millions)") 
       }
   thegraph
   })
@@ -184,9 +183,9 @@ by_region <- filter(year, region == input$region1)
   ggplot(by_region, na.rm = T)+
     geom_point(mapping = aes_string(x = "Annual_population__rate_of_change" , y = "Fertility_rate", color = bins))+
     if(input$bygdp == "GDP_per_capita_USD"){
-      labs(colour = "GDP per capita (USD)")  
+      labs(x = "Annual Pop. Rate of Change (%)", y = "Fertility Rate (%)",colour = "GDP per capita (USD)")  
     }else{
-      labs(colour = "GDP (USD in millions)") 
+      labs(x = "Annual Pop. Rate of Change (%)", y = "Fertility Rate (%)", colour = "GDP (USD in millions)") 
     }
   
   
@@ -221,9 +220,9 @@ output$question4 <-renderPlot({
     geom_point(mapping = aes_string(y = "Annual_population__rate_of_change" , x = "Life_expectancy", color = bins )) +
     
     if(input$type3 == "GDP_per_capita_USD"){
-      labs(colour = "GDP per capita (USD)")  
+      labs(x = "Life Expectancy (yrs.)", y = "Anual Pop. Rate of Change (%)",colour = "GDP per capita (USD)")  
     }else{
-      labs(colour = "GDP (USD in millions)") 
+      labs(x = "Life Expectancy (yrs.)", y = "Anual Pop. Rate of Change (%)",colour = "GDP (USD in millions)") 
     }
   q4_graph
 
