@@ -168,6 +168,23 @@ my_server <-  function(input, output){
       }
   thegraph
   })
+  
+output$test <-renderPlot({
+  year <- filter(selected_complete_data, Year == input$year3)
+  ggplot(year, na.rm = T)+
+    geom_point(mapping = aes_string(x = "Annual_population__rate_of_change" , y = "Fertility_rate"))
+  
+  
+})
+
+output$page4 <-renderPlot({
+  year <- filter(selected_complete_data, Year == input$year)
+  ggplot(year, na.rm = T)+
+    geom_point(mapping = aes_string(x = "Annual_population__rate_of_change" , y = "Fertility_rate"))
+  
+  
+})
+
 }
 
 
@@ -223,28 +240,30 @@ gdp_data <- a("GDP Data Source",
 p(life_exp_url <- a("Population Data Source", 
                     href= "http://data.un.org/_Docs/SYB/PDFs/SYB61_T13_GDP%20and%20GDP%20Per%20Capita.pdf")))
 
-
-page_three <- tabPanel(
-
-  "Graphs2",
-  titlePanel("Visualization"),
-  sidebarLayout( # lay out the passed content into two columns
-    sidebarPanel( # lay out the passed content inside the "sidebar" column
-      radioButtons(inputId = "rb_yr", label = "Pick a year", choices = c(2010, 2015)),
-      
-      
-      selectInput(inputId = "type3", label = "Color by:", choices = c("GDP per capita USD" = "GDP_per_capita_USD", "GDP millions of USD" = "GDP_millions_of_USD")),
-      selectInput(inputId = "type4", label = "Filter by region:", choices = c("All", "Africa", "Americas", "Asia", "Europe", "Oceania"))
-      # selectInput( inputId = "type5", label = "Filter by sub region:", choices = unique(filter(selected_complete_data, Year == input$rb_yr, region == input$type4) %>% select(sub_region)))
-    ),
-    mainPanel( # lay out the passed content inside the "main" column
-      textOutput(outputId = "messagetwo"),
-      span(textOutput("header"), style = "font-size:25px"),
-      plotOutput(outputId = "graph"),
-      textOutput("sentance")
-    )
-  )
+page_three <- tabPanel("Graph5",
+                       titlePanel("graph7"), sidebarLayout(
+                         sidebarPanel(
+                           radioButtons(inputId = "year3", label = "Pick a year", choices = c(2010,2015 ))
+                         ),
+                         mainPanel(
+                           plotOutput(outputId = "test" )
+                         )
+                       )
+  
 )
+
+page_five <- tabPanel("page 4",
+                       titlePanel("graph6"), sidebarLayout(
+                         sidebarPanel(
+                           radioButtons(inputId = "year", label = "Pick a year", choices = c(2010,2015 ))
+                         ),
+                         mainPanel(
+                           plotOutput(outputId = "page4" )
+                         )
+                       )
+                       
+)
+
 
 
 page_zero <- tabPanel(
@@ -252,7 +271,7 @@ page_zero <- tabPanel(
 )
 
 
-my_ui <- navbarPage("My application", page_zero ,page_one,page_two, page_three, page_four)
+my_ui <- navbarPage("My application", page_zero ,page_one, page_two,page_three,page_five,page_four)
 
 
 
